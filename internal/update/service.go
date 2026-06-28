@@ -40,6 +40,17 @@ func NewService() *Service {
 }
 
 func (s *Service) Check(ctx context.Context) (CheckResult, error) {
+	// Termux/Android: the in-app self-updater cannot safely run here — there is
+	// no linux-arm64 release asset, and replacing the running binary risks
+	// ETXTBSY on Android's overlay fs. Short-circuit so neither the auto-check
+	// nor a manual "check now" offers an install; users rebuild in Termux.
+	if termuxEnv() {
+		return CheckResult{
+			CurrentVersion: s.currentVersion,
+			Platform:       platformKey(runtime.GOOS, runtime.GOARCH),
+			Message:        "Termux/Android 暂不支持应用内更新，请在 Termux 内重新构建以升级",
+		}, nil
+	}
 	release, err := s.latestRelease(ctx)
 	if err != nil {
 		return CheckResult{}, err
@@ -76,6 +87,13 @@ func (s *Service) Check(ctx context.Context) (CheckResult, error) {
 		result.Message = "发现可用更新"
 	}
 	return result, nil
+}
+
+// termuxEnv reports whether Nova is running under Termux on Android. Termux
+// sets PREFIX to a path containing "com.termux" and HOME under
+// /data/data/com.termux; both are absent on desktop Linux.
+func termuxEnv() bool {
+	return strings.Contains(os.Getenv("PREFIX"), "com.termux") || strings.HasPrefix(os.Getenv("HOME"), "/data/data/com.termux")
 }
 
 func (s *Service) latestRelease(ctx context.Context) (githubRelease, error) {

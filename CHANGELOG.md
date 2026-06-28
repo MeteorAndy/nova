@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- 移动端（Termux / Android）：Nova 可在 Android 手机上经 Termux 原生运行（手机自托管，浏览器访问 `http://127.0.0.1:8080`，无需笔记本/热点）。新增 `scripts/termux-setup.sh` 一键原生构建+启动脚本；README（中/英）新增「Termux」章节。建议在 Termux 内原生构建（交叉编译的 `CGO_ENABLED=0` 静态二进制会因 Termux 缺 `/etc/resolv.conf` 导致出站模型 API 调用全部失败）。
+
+### Changed
+
+- Agent shell 工具改为按 PATH 解析 `sh`（原先硬编码 `/bin/sh` 在 Termux 下不存在），失败时回退 `/bin/sh`，桌面行为不变。
+- `openBrowser` 在 Linux 上优先 `termux-open-url`、回退 `xdg-open`（Termux 无 `xdg-open`）。
+- 应用内更新在 Termux 上自动禁用并给出提示（无法安全替换运行中的二进制、无 linux-arm64 Release 资产），升级改为在 Termux 内重新构建。
+
 ## [v0.1.16] - 2026-06-27
 
 ### Added

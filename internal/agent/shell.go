@@ -78,6 +78,14 @@ func (s *agentStreamingShell) initCommand(ctx context.Context, command string) (
 
 func shellCommandArgs(goos string, lookPath func(string) (string, error), command string) (string, []string) {
 	if goos != "windows" {
+		// Resolve sh from PATH instead of hardcoding /bin/sh: Termux/Android
+		// has no /bin (its sh is $PREFIX/bin/sh), so a literal /bin/sh fails
+		// there. exec.LookPath finds sh on both desktop (/bin/sh or /usr/bin/sh)
+		// and Termux. Fall back to /bin/sh when PATH lookup fails (preserves
+		// prior behaviour) — the command runs `sh -c <command>` either way.
+		if sh := lookupShell(lookPath, "sh"); sh != "" {
+			return sh, []string{"-c", command}
+		}
 		return "/bin/sh", []string{"-c", command}
 	}
 

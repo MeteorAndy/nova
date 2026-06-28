@@ -116,6 +116,36 @@ Default addresses:
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:8080`
 
+### Option 3: Termux (self-host on an Android phone)
+
+Nova can run natively on an Android phone via [Termux](https://termux.org) — the phone hosts the backend itself, and you open `http://127.0.0.1:8080` in the phone's browser. No laptop, no hotspot. The **F-Droid build of Termux** is recommended (the Play Store build is deprecated and breaks wake-locks).
+
+**One-command script** (from the repo root, inside Termux):
+
+```bash
+bash scripts/termux-setup.sh
+```
+
+It runs `pkg install golang`, builds Nova **natively** in Termux, acquires a wake-lock, and starts it. Then open `http://127.0.0.1:8080` in the phone browser.
+
+> Why build inside Termux instead of cross-compiling a static binary? A cross-compiled `CGO_ENABLED=0` static binary serves the page, but Go's netgo resolver reads `/etc/resolv.conf` (absent on Termux/Android) and falls back to `[::1]:53`, so **every outbound model API call fails**. Building in Termux (`go build`, CGO on by default → links Bionic libc) gives working DNS.
+
+**Manual steps** (equivalent to the script):
+
+```bash
+pkg update && pkg install golang git
+git clone https://github.com/alfredxw/nova.git ~/nova && cd ~/nova
+go build -ldflags="-s -w" -o ~/nova-run/nova ./cmd/nova/
+termux-wake-lock                      # survive screen-off (needs pkg install termux-api)
+cd ~/nova-run && ./nova --no-open --port 8080
+```
+
+**Notes**:
+
+- Use `http://127.0.0.1:8080` in the browser (some Android devices resolve `localhost` oddly).
+- Set Android Settings → Apps → Termux → Battery to "Unrestricted"; do not dismiss Termux's persistent notification — it is the foreground service keeping Nova alive.
+- Only arm64 is validated. The in-app updater is not supported on Termux (a running binary cannot be safely replaced); to upgrade, `git pull && go build`.
+
 ## Models and Configuration
 
 Nova uses an OpenAI-compatible API. You can configure it quickly with environment variables:

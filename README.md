@@ -116,6 +116,36 @@ corepack enable
 - 前端：`http://localhost:5173`
 - 后端：`http://localhost:8080`
 
+### 方式三：Termux（Android 手机自托管）
+
+Nova 可以在 Android 手机上通过 [Termux](https://termux.org) 原生运行——手机自身托管后端，用手机浏览器打开 `http://127.0.0.1:8080` 即可使用，无需笔记本、无需热点。建议使用 **F-Droid 版 Termux**（Play Store 版已停更且 wake-lock 异常）。
+
+**一键脚本**（Termux 中、仓库目录下执行）：
+
+```bash
+bash scripts/termux-setup.sh
+```
+
+脚本会 `pkg install golang`、在 Termux 内**原生构建**、获取 wake-lock 并启动。完成后用手机浏览器打开 `http://127.0.0.1:8080`。
+
+> 为什么必须在 Termux 里构建，而不是交叉编译一个静态二进制丢进来？交叉编译的 `CGO_ENABLED=0` 静态二进制能起服务，但 Go 的 netgo 解析器要读 `/etc/resolv.conf`（Termux/Android 没有）→ 回退到 `[::1]:53` → **所有出站模型 API 调用都会失败**。在 Termux 内 `go build` 默认 CGO 开启、链接 Bionic libc，DNS 正常。
+
+**手动步骤**（等价于脚本）：
+
+```bash
+pkg update && pkg install golang git
+git clone https://github.com/alfredxw/nova.git ~/nova && cd ~/nova
+go build -ldflags="-s -w" -o ~/nova-run/nova ./cmd/nova/
+termux-wake-lock                      # 防止息屏被杀（需 pkg install termux-api）
+cd ~/nova-run && ./nova --no-open --port 8080
+```
+
+**注意事项**：
+
+- 浏览器用 `http://127.0.0.1:8080`（少数 Android 对 `localhost` 解析异常，优先用 IP）。
+- 系统设置 → 应用 → Termux → 电池设为「无限制」；不要划掉 Termux 的常驻通知（它就是维持 Nova 存活的前台服务）。
+- 仅验证 arm64 设备；应用内更新在 Termux 上不可用（无法安全替换运行中的二进制），升级请 `git pull && go build` 重新构建。
+
 ## 模型与配置
 
 Nova 使用 OpenAI 兼容接口，可通过环境变量快速配置：
