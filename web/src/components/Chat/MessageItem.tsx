@@ -36,6 +36,7 @@ const messageActionTooltipSideOffset = 3
 
 /** 单条消息组件，根据 role 渲染不同样式 */
 export const MessageItem = memo(function MessageItem({ message, highlightDialogue = false, messageStyle, onEdit, onRegenerate, onSwitchVersion, onOpenSubAgentSession, onInsertIllustration, onGenerateInteractiveImage, generatingInteractiveImageTurnId, activeSubAgentSessionKey, subAgentPresentation = 'card' }: MessageItemProps) {
+  const { t } = useTranslation()
   const { role, content = '' } = message
   const canEdit = role === 'user' && Boolean(message.turn_id) && Boolean(onEdit)
   const canRegenerate = role === 'assistant' && Boolean(message.turn_id) && Boolean(onRegenerate) && !message.streaming
@@ -44,6 +45,7 @@ export const MessageItem = memo(function MessageItem({ message, highlightDialogu
   const markedVersionIndex = message.turn_versions?.findIndex((version) => version.current) ?? -1
   const versionIndex = message.turn_version_index ?? markedVersionIndex
   const canSwitchVersion = role === 'assistant' && versionCount > 1 && versionIndex >= 0 && Boolean(onSwitchVersion) && !message.streaming
+  const showAssistantActions = role === 'assistant' && !message.streaming
 
   switch (role) {
     case 'user':
