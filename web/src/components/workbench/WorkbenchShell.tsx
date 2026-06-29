@@ -589,13 +589,15 @@ export function WorkbenchShell({
         )}
       </header>
     )
-    const mobileActivityItems: MobileNavItem[] = activityItems.map((item) => ({
-      id: item.id,
-      label: item.label,
-      icon: item.icon,
-      active: item.active,
-      onClick: item.onClick,
-    }))
+    const mobileActivityItems: MobileNavItem[] = activityItems
+      .filter((item) => item.id !== 'writing')
+      .map((item) => ({
+        id: item.id,
+        label: item.label,
+        icon: item.icon,
+        active: item.active,
+        onClick: item.onClick,
+      }))
     const mobileProjectDrawer = mode === 'ide' && !fullWorkspacePanelVisible && sidebar ? {
       id: 'project' as const,
       title: t('workbench.mobile.project'),
