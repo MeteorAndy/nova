@@ -601,7 +601,7 @@ export function WorkbenchShell({
         active: item.active,
         onClick: item.onClick,
       }))
-    const mobileProjectDrawer = mode === 'ide' && sidebar ? {
+    const mobileProjectDrawer = sidebar ? {
       id: 'project' as const,
       title: t('workbench.mobile.project'),
       icon: <PanelLeft className="h-4 w-4" />,
