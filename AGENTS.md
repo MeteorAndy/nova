@@ -75,3 +75,17 @@
 1. 使用 go mod tidy 确保依赖拉下来了
 2. 使用 ./build.sh 构建项目
 3. 使用 ./bootstrap.sh fe/be 启动项目
+
+# Agent skills
+
+## Issue tracker
+
+Issues live as **GitHub Issues** in this repo (driven by the `gh` CLI). External PRs are **not** a triage surface. See `docs/agents/issue-tracker.md`.
+
+## Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+## Domain docs
+
+Single-context layout: one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
