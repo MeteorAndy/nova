@@ -623,7 +623,7 @@ export function WorkbenchShell({
             <Panel id="nova-mobile-editor" minSize="30%" className="min-h-0">
               {main}
             </Panel>
-            <Separator aria-label={t('layout.resize.bottom')} className="nova-resize-handle -my-1 h-2 cursor-row-resize bg-transparent transition-colors" />
+            <Separator aria-label={t('layout.resize.bottom')} className="nova-resize-handle h-2.5 shrink-0 cursor-row-resize border-y border-[var(--nova-border)] bg-[var(--nova-surface-2)] transition-colors" />
             <Panel id="nova-mobile-agent" defaultSize="38%" minSize="20%" className="min-h-0">
               {rightPanelContent}
             </Panel>
