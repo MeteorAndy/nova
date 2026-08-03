@@ -2,8 +2,10 @@ package api
 
 import (
 	"bytes"
+	"encoding/json"
 	"mime/multipart"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/cloudwego/hertz/pkg/common/ut"
@@ -46,7 +48,9 @@ func TestNovelImportAppearsInTaskCenterAsImportExport(t *testing.T) {
 		t.Fatalf("import status = %d body=%s", importResp.Code, importResp.Body.String())
 	}
 	var result book.NovelImportResult
-	decodeResponse(t, importResp.Body.Bytes(), &result)
+	if !decodeNovelImportDoneEvent(t, importResp.Body.String(), &result) {
+		t.Fatalf("import stream is missing the done event:\n%s", importResp.Body.String())
+	}
 	if result.Workspace == "" || result.ChapterCount != 2 {
 		t.Fatalf("unexpected import result: %#v", result)
 	}
@@ -80,4 +84,23 @@ func TestNovelImportAppearsInTaskCenterAsImportExport(t *testing.T) {
 	if importTask.Error != "" {
 		t.Fatalf("completed import task should not carry an error: %#v", importTask)
 	}
+}
+
+func decodeNovelImportDoneEvent(t *testing.T, body string, target *book.NovelImportResult) bool {
+	t.Helper()
+	for _, block := range strings.Split(body, "\n\n") {
+		if !strings.Contains(block, "event: done") {
+			continue
+		}
+		for _, line := range strings.Split(block, "\n") {
+			if !strings.HasPrefix(line, "data: ") {
+				continue
+			}
+			if err := json.Unmarshal([]byte(strings.TrimPrefix(line, "data: ")), target); err != nil {
+				t.Fatalf("decode done event failed: %v", err)
+			}
+			return true
+		}
+	}
+	return false
 }

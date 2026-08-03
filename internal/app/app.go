@@ -36,6 +36,8 @@ type App struct {
 	agentTaskRuns          map[string]*agentTaskRun
 	interactiveTaskRuns    map[string]*interactiveTaskRun
 	activeLoreImageTask    *Task
+	activeNovelImportTask  *Task
+	activeNovelImportTitle string
 	lastImportExportTask   *taskcenter.Task
 	activeAutomationTasks  map[string]*Task
 	activeAutomationRuns   map[string]automationRunState

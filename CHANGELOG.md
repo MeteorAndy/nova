@@ -38,6 +38,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Pending offline drafts now also record the server content the edit was based on; when the server revision has moved on after reconnecting, the draft goes through the existing three-way merge conflict review instead of silently overwriting the offline edit.
 - 小说导入结果现在会登记为任务中心里的导入导出任务：完成后可点击切回新建书籍工作区，失败任务也会保留错误信息。
 - Novel import results now appear in the Task Center as import/export tasks: completed imports can be reopened by switching to the new book workspace, and failed imports retain their error message.
+- 小说导入改为后台任务并通过 SSE 流式返回：运行中会出现在任务中心，进度以事件流下发，完成后返回结果；`POST /api/books/import-novel` 的响应从 JSON 改为 SSE。
+- Novel import now runs as a background task streamed over SSE: it appears in the Task Center while running, progress is delivered as events, and the result is returned when done; `POST /api/books/import-novel` now responds with SSE instead of JSON.
 
 ### Changed
 

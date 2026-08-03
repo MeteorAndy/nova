@@ -90,7 +90,34 @@ func (a *App) Tasks() (taskcenter.ListResult, error) {
 	}
 	a.mu.RLock()
 	lastImportExportTask := a.lastImportExportTask
+	activeNovelImportTask := a.activeNovelImportTask
+	activeNovelImportTitle := a.activeNovelImportTitle
 	a.mu.RUnlock()
+	if activeNovelImportTask != nil && !activeNovelImportTask.Finished() {
+		snapshot := activeNovelImportTask.Snapshot()
+		if status, statusErr := agentTaskStatus(snapshot.Status); statusErr == nil {
+			workspace := a.Workspace()
+			task := taskcenter.Task{
+				ID:        "import-export:" + snapshot.ID,
+				Type:      taskcenter.TaskTypeImportExport,
+				Status:    status,
+				Title:     activeNovelImportTitle,
+				Project:   taskProjectRef(workspace, projectNames),
+				StartedAt: snapshot.StartedAt,
+				UpdatedAt: snapshot.UpdatedAt,
+				Recovery: taskcenter.RecoveryTarget{
+					Kind:      taskcenter.RecoveryImportExport,
+					Workspace: workspace,
+					TaskID:    snapshot.ID,
+				},
+				Error: snapshot.Error,
+			}
+			result.Tasks = append(result.Tasks, task)
+			if taskcenter.IsActionRequired(task.Status) {
+				result.ActionRequiredCount++
+			}
+		}
+	}
 	if lastImportExportTask != nil {
 		result.Tasks = append(result.Tasks, *lastImportExportTask)
 		if taskcenter.IsActionRequired(lastImportExportTask.Status) {
