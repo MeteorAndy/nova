@@ -90,4 +90,21 @@ describe('CurrentStateRevisionWorkspace', () => {
     await user.click(screen.getByRole('button', { name: '放弃变更' }))
     expect(onBack).toHaveBeenCalledTimes(1)
   })
+
+  it('lets Escape close the discard dialog before triggering the workspace back', async () => {
+    const user = userEvent.setup()
+    const onBack = vi.fn()
+    render(<CurrentStateRevisionWorkspace storyId="story-1" branchId="main" snapshot={snapshotFixture()} onBack={onBack} />)
+
+    const tagsInput = screen.getByRole('textbox', { name: 'Metadata / Tags' })
+    fireEvent.change(tagsInput, { target: { value: '{"tags":["changed"]}' } })
+    await user.keyboard('{Escape}')
+    expect(screen.getByRole('alertdialog', { name: '放弃未保存的变更？' })).toBeInTheDocument()
+
+    await user.keyboard('{Escape}')
+
+    expect(screen.queryByRole('alertdialog', { name: '放弃未保存的变更？' })).not.toBeInTheDocument()
+    expect(onBack).not.toHaveBeenCalled()
+    expect(screen.getByRole('heading', { name: '修订当前状态' })).toBeInTheDocument()
+  })
 })
