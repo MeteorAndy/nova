@@ -128,6 +128,7 @@ const storyStage = {
   'storyStage.hotChoices.count': '{{count}} 条行动建议',
   'storyStage.hotChoices.collapse': '收起行动选择',
   'storyStage.hotChoices.get': '获取行动选择',
+  'storyStage.hotChoices.more': '更多选择（{{count}}）',
   'storyStage.hotChoices.button': '选择',
   'storyStage.interactiveImage.menuTitle': '互动图像',
   'storyStage.interactiveImage.modeManual': '手动生成',

@@ -542,7 +542,8 @@ export function StoryStage({ workspace, styleSceneSuggestions = [], stories = []
   const directorBlocking = false
   const directorStatusVisible = Boolean(directorPlanStatus && directorBlocking)
   const canUseHotChoices = hotChoices.length > 0 && !branchTerminal && !streaming && !editingTurn && !directorBlocking && Boolean(storyId)
-  const showHotChoices = canUseHotChoices && hotChoicesExpanded
+  const showHotChoices = canUseHotChoices
+  const visibleHotChoices = hotChoicesExpanded ? hotChoices : hotChoices.slice(0, 3)
   const messageListBottomPadding = inputFloatHeight > 0 ? inputFloatHeight + keyboardInset + 20 : undefined
   const availableBookOpeningPresets = useMemo(() => bookOpeningPresets.filter((preset) => preset.content.trim()), [bookOpeningPresets])
   const selectedBookOpeningPreset = useMemo(
@@ -1364,10 +1365,9 @@ export function StoryStage({ workspace, styleSceneSuggestions = [], stories = []
                   {hotChoicesExpanded ? <ChevronUp className="h-3.5 w-3.5 shrink-0 text-[var(--nova-text-faint)]" /> : <ChevronDown className="h-3.5 w-3.5 shrink-0 text-[var(--nova-text-faint)]" />}
                 </button>
               </div>
-              {hotChoicesExpanded ? (
-                <div className="border-t border-[var(--nova-border)] px-2 py-2">
-                  <div data-testid="story-stage-hot-choices-list" className="flex max-h-48 flex-wrap content-start gap-1.5 overflow-y-auto overscroll-contain pr-1">
-                    {hotChoices.map((choice, index) => (
+              <div className="border-t border-[var(--nova-border)] px-2 py-2">
+                <div data-testid="story-stage-hot-choices-list" className="flex max-h-48 flex-wrap content-start gap-1.5 overflow-y-auto overscroll-contain pr-1">
+                    {visibleHotChoices.map((choice, index) => (
                       <button
                         key={`${index}-${choice}`}
                         type="button"
@@ -1388,9 +1388,19 @@ export function StoryStage({ workspace, styleSceneSuggestions = [], stories = []
                         <span className="block max-w-full break-words">{choice}</span>
                       </button>
                     ))}
-                  </div>
+                    {!hotChoicesExpanded && hotChoices.length > 3 ? (
+                      <button
+                        type="button"
+                        className="min-w-0 max-w-full flex-none rounded-[var(--nova-radius)] border border-dashed border-[var(--nova-border)] bg-[var(--nova-surface)] px-2.5 py-1.5 text-left text-xs leading-5 text-[var(--nova-text-muted)] hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text)]"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => setHotChoicesExpanded(true)}
+                        aria-label={t('storyStage.hotChoices.more', { count: hotChoices.length - 3 })}
+                      >
+                        <span className="block max-w-full break-words">{t('storyStage.hotChoices.more', { count: hotChoices.length - 3 })}</span>
+                      </button>
+                    ) : null}
                 </div>
-              ) : null}
+              </div>
             </div>
           ) : null}
           <div className="relative min-w-0">
@@ -1579,10 +1589,12 @@ export function StoryStage({ workspace, styleSceneSuggestions = [], stories = []
               toolbarEnd={
                 <>
                   <ModelProfileSwitcher agentKey="interactive_story" workspace={workspace} disabled={streaming || directorBlocking} />
-                  <Button type="button" variant="outline" className={`nova-agent-composer-pill h-8 shrink-0 rounded-[10px] border-[var(--nova-border)] bg-[var(--nova-surface)] px-2.5 text-[11px] text-[var(--nova-text-muted)] hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text)] ${hotChoicesExpanded ? 'text-[var(--nova-text)]' : ''}`} disabled={!canUseHotChoices} onMouseDown={(event) => event.preventDefault()} onClick={toggleHotChoices} aria-label={hotChoicesExpanded ? t('storyStage.hotChoices.collapse') : t('storyStage.hotChoices.get')} title={hotChoicesExpanded ? t('storyStage.hotChoices.collapse') : t('storyStage.hotChoices.get')}>
-                    <Compass className="h-3.5 w-3.5" />
-                    {!isMobile ? t('storyStage.hotChoices.button') : null}
-                  </Button>
+                  {hotChoices.length > 3 ? (
+                    <Button type="button" variant="outline" className={`nova-agent-composer-pill h-8 shrink-0 rounded-[10px] border-[var(--nova-border)] bg-[var(--nova-surface)] px-2.5 text-[11px] text-[var(--nova-text-muted)] hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text)] ${hotChoicesExpanded ? 'text-[var(--nova-text)]' : ''}`} disabled={!canUseHotChoices} onMouseDown={(event) => event.preventDefault()} onClick={toggleHotChoices} aria-label={hotChoicesExpanded ? t('storyStage.hotChoices.collapse') : t('storyStage.hotChoices.button')} title={hotChoicesExpanded ? t('storyStage.hotChoices.collapse') : t('storyStage.hotChoices.button')}>
+                      <Compass className="h-3.5 w-3.5" />
+                      {!isMobile ? t('storyStage.hotChoices.button') : null}
+                    </Button>
+                  ) : null}
                 </>
               }
               submitControl={

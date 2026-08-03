@@ -93,14 +93,13 @@ describe('StoryStage TurnResult choices', () => {
 		)
 
 		const modelSelector = await screen.findByRole('button', { name: /切换模型/ })
-		const choiceControl = screen.getByRole('button', { name: '获取行动选择' })
 		const sendAction = screen.getByRole('button', { name: '发送' })
 
-		expect(modelSelector.compareDocumentPosition(choiceControl)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
-		expect(choiceControl.compareDocumentPosition(sendAction)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+		expect(screen.queryByRole('button', { name: '获取行动选择' })).not.toBeInTheDocument()
+		expect(modelSelector.compareDocumentPosition(sendAction)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
 	})
 
-	it('uses persisted TurnResult choices and only reveals them after the user opens the panel', async () => {
+	it('shows persisted TurnResult choices directly and fills the composer without sending', async () => {
 		const user = userEvent.setup()
 		const turn = {
 			id: 'turn-1',
@@ -130,10 +129,57 @@ describe('StoryStage TurnResult choices', () => {
 			</VirtuosoMockContext.Provider>,
 		)
 
-		expect(screen.queryByText('绕到钟楼背面')).not.toBeInTheDocument()
+		expect(screen.getByText('绕到钟楼背面')).toBeInTheDocument()
 		expect(screen.queryByLabelText('当前故事态势')).not.toBeInTheDocument()
-		await user.click(screen.getByRole('button', { name: '获取行动选择' }))
-		expect(await screen.findByText('绕到钟楼背面')).toBeInTheDocument()
+		expect(screen.queryByRole('button', { name: '获取行动选择' })).not.toBeInTheDocument()
+
+		await user.click(screen.getByRole('button', { name: '绕到钟楼背面' }))
+
+		expect(screen.getByPlaceholderText('你要做什么？')).toHaveTextContent('绕到钟楼背面')
+		expect(sendInteractiveMessageMock).not.toHaveBeenCalled()
+	})
+
+	it('shows at most three choices directly and reveals the rest through More choices', async () => {
+		const user = userEvent.setup()
+		const turn = {
+			id: 'turn-2',
+			parent_id: null,
+			branch_id: 'main',
+			ts: '2026-06-28T00:00:00Z',
+			user: '检查钟楼',
+			narrative: '钟楼上有反光一闪。',
+			state_status: 'ready' as const,
+			turn_result: {
+				state_updates: [],
+				choices: ['绕到钟楼背面', '询问附近守夜人', '爬上屋顶', '保持沉默'],
+			},
+		}
+		render(
+			<VirtuosoMockContext.Provider value={{ viewportHeight: 1200, itemHeight: 120 }}>
+				<StoryStage
+					workspace="/tmp/book"
+					stories={[story()]}
+					story={story()}
+					tellers={[]}
+					storyId="story-1"
+					branchId="main"
+					snapshot={{ story_id: 'story-1', branch_id: 'main', turns: [turn], current_turn: turn, state: {} }}
+					onDone={() => undefined}
+				/>
+			</VirtuosoMockContext.Provider>,
+		)
+
+		expect(screen.getByText('绕到钟楼背面')).toBeInTheDocument()
+		expect(screen.getByText('询问附近守夜人')).toBeInTheDocument()
+		expect(screen.getByText('爬上屋顶')).toBeInTheDocument()
+		expect(screen.queryByText('保持沉默')).not.toBeInTheDocument()
+
+		await user.click(screen.getByRole('button', { name: '更多选择（1）' }))
+
+		expect(screen.getByText('保持沉默')).toBeInTheDocument()
+		await user.click(screen.getByRole('button', { name: '保持沉默' }))
+		expect(screen.getByPlaceholderText('你要做什么？')).toHaveTextContent('保持沉默')
+		expect(sendInteractiveMessageMock).not.toHaveBeenCalled()
 	})
 
   it('does not open persisted choices when they arrive during the story stream', async () => {
@@ -163,11 +209,7 @@ describe('StoryStage TurnResult choices', () => {
         stream.enqueue({ event: 'done', data: '{}' })
         stream.close()
       })
-      await waitFor(() => expect(screen.getByRole('button', { name: '获取行动选择' })).not.toBeDisabled())
-      expect(screen.queryByText('沿墙观察')).not.toBeInTheDocument()
-
-      await user.click(screen.getByRole('button', { name: '获取行动选择' }))
-      expect(await screen.findByText('沿墙观察')).toBeInTheDocument()
+      await waitFor(() => expect(screen.getByText('沿墙观察')).toBeInTheDocument())
     } finally {
       stream.close()
     }
@@ -465,12 +507,10 @@ describe('StoryStage composer', () => {
 
     expect(screen.queryByText('导演正在规划故事')).not.toBeInTheDocument()
     expect(screen.getByPlaceholderText('你要做什么？')).toHaveAttribute('contenteditable', 'true')
-    expect(screen.getByRole('button', { name: '获取行动选择' })).not.toBeDisabled()
+    expect(screen.getByText('继续观察')).toBeInTheDocument()
 
     await user.type(screen.getByPlaceholderText('你要做什么？'), '继续前进')
     expect(screen.getByRole('button', { name: '发送' })).not.toBeDisabled()
-    await user.click(screen.getByRole('button', { name: '获取行动选择' }))
-    expect(await screen.findByText('继续观察')).toBeInTheDocument()
   })
 
   it('inserts interactive Skills as inline tokens and sends compatible text', async () => {

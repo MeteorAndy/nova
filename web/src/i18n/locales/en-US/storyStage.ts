@@ -128,6 +128,7 @@ const storyStage = {
   'storyStage.hotChoices.count': '{{count}} action suggestions',
   'storyStage.hotChoices.collapse': 'Collapse action choices',
   'storyStage.hotChoices.get': 'Get action choices',
+  'storyStage.hotChoices.more': 'More choices ({{count}})',
   'storyStage.hotChoices.button': 'Choices',
   'storyStage.interactiveImage.menuTitle': 'Interactive Image',
   'storyStage.interactiveImage.modeManual': 'Manual',

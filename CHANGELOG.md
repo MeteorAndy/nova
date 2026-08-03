@@ -42,6 +42,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Novel import now runs as a background task streamed over SSE: it appears in the Task Center while running, progress is delivered as events, and the result is returned when done; `POST /api/books/import-novel` now responds with SSE instead of JSON.
 - 系统通知发送能力上线：开启“系统通知”偏好后，等待用户或失败的任务会请求权限并显示只含任务类型与来源项目的通知（不含正文、提示词或工具内容）；同一任务只提醒一次。
 - System notifications are now sent when the preference is enabled: waiting-user or failed tasks request permission and show a notification containing only the task type and source project (never body, prompt, or tool content), with one reminder per task.
+- 故事舞台行动建议默认直接显示最多三项，点击只填入输入框不直接发送；超过三项时提供“更多选择”入口展开其余建议。
+- Story stage action suggestions now show up to three directly by default and only fill the composer when tapped; a “More choices” entry reveals the rest when there are more than three.
 
 ### Changed
 
