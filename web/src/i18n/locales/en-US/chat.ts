@@ -1,4 +1,10 @@
 const chat = {
+  'chat.handoff.listLabel': 'Context handoffs to send',
+  'chat.handoff.source.editorSelection': 'Editor selection',
+  'chat.handoff.purpose.askAgent': 'Ask Agent',
+  'chat.handoff.versionUnknown': 'Version unavailable',
+  'chat.handoff.sizeBytes': '{{bytes}} bytes',
+  'chat.handoff.remove': 'Remove context handoff: {{source}}',
   'chat.agent': 'Writing Agent',
   'chat.panelSwitch': 'Agent panel switcher',
   'chat.view.chat': 'Chat',
@@ -135,6 +141,7 @@ const chat = {
   'chat.tracePanel.truncation': 'truncated',
   'chat.action.editTurn': 'Edit this input',
   'chat.action.editAssistantReply': 'Edit AI reply',
+  'chat.action.createBranchFromTurn': 'Create story branch from this turn',
   'chat.action.copyMessage': 'Copy message',
   'chat.action.copyMessageDone': 'Copied',
   'chat.action.prevVersion': 'Switch to previous version',

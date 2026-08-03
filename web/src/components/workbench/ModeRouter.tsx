@@ -17,6 +17,7 @@ import type { BookRecord, BookSortMode, ChapterIllustration, ChapterSummary, Con
 import type { AgentUIMessage } from '@/lib/agent-ui'
 import type { ChatSendOptions } from '@/hooks/useAgentChat'
 import { usePersistedUserSettings } from '@/hooks/usePersistedUserSettings'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import type { AgentPartRef } from '@/lib/agent-message-view'
 import type { RightPanel, WorkspaceMode } from '@/stores/workspace-store'
 import { workspaceFileKind } from '@/lib/workspace-file-kind'
@@ -28,6 +29,7 @@ import type { WorkbenchNotice } from '@/features/notices/use-workbench-notice'
 import type { Tab } from './TabController'
 import { TabController, tabKey } from './TabController'
 import { WorkbenchShell } from './WorkbenchShell'
+import { requestMobileWorkbenchDestination } from '@/features/mobile-workbench/navigation'
 import { flattenFileTree, formatNumber } from './workbench-utils'
 
 const WRITING_AGENT_INIT_EVENT = 'nova:writing-agent-init'
@@ -138,6 +140,7 @@ interface ModeRouterProps {
 
 export function ModeRouter(props: ModeRouterProps) {
   const { t, i18n } = useTranslation()
+  const isMobile = useIsMobile()
   const {
     mode,
     booksReturnMode,
@@ -498,6 +501,12 @@ export function ModeRouter(props: ModeRouterProps) {
                   : 'ide-writing'
   const [mountedRoutes, setMountedRoutes] = useState<ReadonlySet<MainRouteId>>(() => new Set(['ide-writing', visibleMainRoute]))
 
+  const selectProjectFile = useCallback(async (path: string) => {
+    const navigated = await onSelectFile(path)
+    if (navigated !== false) requestMobileWorkbenchDestination('manuscript')
+    return navigated
+  }, [onSelectFile])
+
   useEffect(() => {
     setMountedRoutes((current) => {
       if (current.has(visibleMainRoute)) return current
@@ -546,14 +555,17 @@ export function ModeRouter(props: ModeRouterProps) {
             outline={summary?.outline}
             chapterPlans={summary?.chapter_plans || []}
             selectedFile={selectedFile}
-            onSelectFile={(path) => { void onSelectFile(path) }}
+            onSelectFile={(path) => { void selectProjectFile(path) }}
             onRequestBookSettingCreate={(item) => requestSkillsAgent(t('planning.bookSettingCreatePrompt', item))}
             onSetChapterConfirmed={onSetChapterConfirmed}
           />
         ) : sidebarView === 'search' ? (
           <SearchPanel
             workspace={workspace}
-            onSelectResult={onSelectSearchResult}
+            onSelectResult={async (result, query) => {
+              await onSelectSearchResult(result, query)
+              requestMobileWorkbenchDestination('manuscript')
+            }}
             onWorkspaceChanged={onWorkspaceChanged}
           />
         ) : tree.length === 0 ? (
@@ -562,7 +574,7 @@ export function ModeRouter(props: ModeRouterProps) {
           <FileTree
             nodes={tree}
             selectedFile={selectedFile}
-            onSelectFile={onSelectFile}
+            onSelectFile={(path) => { void selectProjectFile(path) }}
             onReferenceFile={onReferenceFile}
             chapterStats={chapterStats}
             onCreateItem={onCreateItem}
@@ -600,21 +612,23 @@ export function ModeRouter(props: ModeRouterProps) {
           />
         ) : (
           <>
-            <TabController
-              tabs={openTabs}
-              activeTabKey={activeTabKey}
-              summary={summary}
-              actions={(
-                <IdeWritingInfoActions
-                  projectVisible={projectVisible}
-                  aiVisible={aiVisible}
-                  onToggleProjectVisible={onToggleProjectVisible}
-                  onToggleAgent={() => onSetRightPanel(aiVisible ? null : 'ai')}
-                />
-              )}
-              onActivateTab={onActivateTab}
-              onCloseTab={onCloseTab}
-            />
+            {!isMobile && (
+              <TabController
+                tabs={openTabs}
+                activeTabKey={activeTabKey}
+                summary={summary}
+                actions={(
+                  <IdeWritingInfoActions
+                    projectVisible={projectVisible}
+                    aiVisible={aiVisible}
+                    onToggleProjectVisible={onToggleProjectVisible}
+                    onToggleAgent={() => onSetRightPanel(aiVisible ? null : 'ai')}
+                  />
+                )}
+                onActivateTab={onActivateTab}
+                onCloseTab={onCloseTab}
+              />
+            )}
             <div className="flex min-h-0 flex-1 flex-col">
               {activeTab ? (
                 activeFileKind === 'image' || activeFileKind === 'json' || activeFileKind === 'jsonl' ? (

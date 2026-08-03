@@ -3,7 +3,6 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdaptiveSurface } from './adaptive-surface'
-import { MobilePaneHost } from './mobile-pane-host'
 
 const defaultResizeObserver = globalThis.ResizeObserver
 
@@ -152,89 +151,18 @@ describe('AdaptiveSurface', () => {
     expect(document.querySelector('[data-nova-mobile-pane-host="true"]')).toBeInTheDocument()
   })
 
-  it('opens mobile panes from edge swipes', () => {
+  it('reserves viewport edge drags for system and browser gestures', () => {
     setMobileViewport(true)
     const { container } = render(adaptiveSurface())
     const host = container.querySelector('[data-nova-mobile-pane-host="true"]')!
 
     fireEvent.pointerDown(host, { pointerId: 1, pointerType: 'touch', button: 0, clientX: 1, clientY: 120 })
     fireEvent.pointerUp(window, { pointerId: 1, pointerType: 'touch', clientX: 80, clientY: 124 })
-
-    expect(screen.getByTestId('left-pane').closest('[data-state="open"]')).toBeTruthy()
-  })
-
-  it('opens mobile panes from mouse edge drags', () => {
-    setMobileViewport(true)
-    const { container } = render(adaptiveSurface())
-    const host = container.querySelector('[data-nova-mobile-pane-host="true"]')!
-
-    fireEvent.mouseDown(host, { button: 0, clientX: 1, clientY: 120 })
-    fireEvent.mouseUp(window, { clientX: 80, clientY: 124 })
-
-    expect(screen.getByTestId('left-pane').closest('[data-state="open"]')).toBeTruthy()
-  })
-
-  it('moves mobile panes with the active edge drag before release', () => {
-    setMobileViewport(true)
-    const { container } = render(adaptiveSurface())
-    const host = container.querySelector('[data-nova-mobile-pane-host="true"]')!
-
-    fireEvent.mouseDown(host, { button: 0, clientX: 1, clientY: 120 })
-    fireEvent.mouseMove(window, { clientX: 44, clientY: 122 })
-
-    const drawer = screen.getByTestId('left-pane').closest('[data-nova-mobile-pane-content="true"]') as HTMLElement
-    expect(drawer).toBeTruthy()
-    expect(drawer.style.transform).toContain('translate3d(-')
-    expect(drawer.style.transform).not.toBe('translate3d(0%, 0, 0)')
-
-    fireEvent.mouseUp(window, { clientX: 90, clientY: 124 })
-    expect(screen.getByTestId('left-pane').closest('[data-state="open"]')).toBeTruthy()
-  })
-
-  it('opens mobile panes from text editor edge drags', () => {
-    setMobileViewport(true)
-    render(
-      <AdaptiveSurface right={{ id: 'right', title: 'Right', side: 'right', content: <div data-testid="right-pane">Right pane</div> }}>
-        <textarea aria-label="Editor" />
-      </AdaptiveSurface>
-    )
-
-    fireEvent.mouseDown(screen.getByRole('textbox', { name: 'Editor' }), { button: 0, clientX: 389, clientY: 120 })
+    fireEvent.mouseDown(host, { button: 0, clientX: 389, clientY: 120 })
     fireEvent.mouseUp(window, { clientX: 320, clientY: 124 })
 
-    expect(screen.getByTestId('right-pane').closest('[data-state="open"]')).toBeTruthy()
-  })
-
-  it('respects explicit swipe opt-out targets', () => {
-    setMobileViewport(true)
-    render(
-      <AdaptiveSurface left={{ id: 'left', title: 'Left', side: 'left', content: <div data-testid="left-pane">Left pane</div> }}>
-        <div data-testid="drag-blocker" data-nova-swipe-ignore="true">Ignore gestures</div>
-      </AdaptiveSurface>
-    )
-
-    fireEvent.mouseDown(screen.getByTestId('drag-blocker'), { button: 0, clientX: 1, clientY: 120 })
-    fireEvent.mouseUp(window, { clientX: 80, clientY: 124 })
-
     expect(screen.queryByTestId('left-pane')).not.toBeInTheDocument()
-  })
-
-  it('keeps nested mobile pane gestures scoped to the inner surface', () => {
-    setMobileViewport(true)
-    const { container } = render(
-      <MobilePaneHost closeLabel="Close" panes={[{ id: 'outer', title: 'Project', side: 'left', content: <div data-testid="outer-pane">Project pane</div> }]}>
-        <AdaptiveSurface left={{ id: 'inner', title: 'Settings', side: 'left', content: <div data-testid="inner-pane">Settings pane</div> }}>
-          <div data-testid="nested-main">Settings content</div>
-        </AdaptiveSurface>
-      </MobilePaneHost>
-    )
-    const innerHost = container.querySelectorAll('[data-nova-mobile-pane-host="true"]')[1]!
-
-    fireEvent.mouseDown(innerHost, { button: 0, clientX: 1, clientY: 120 })
-    fireEvent.mouseUp(window, { clientX: 80, clientY: 124 })
-
-    expect(screen.getByTestId('inner-pane').closest('[data-state="open"]')).toBeTruthy()
-    expect(screen.queryByTestId('outer-pane')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('right-pane')).not.toBeInTheDocument()
   })
 })
 

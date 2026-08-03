@@ -6,6 +6,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Mobile Workbench v2 替换旧移动布局：写作模式使用“正文、项目、Agent、更多”，游戏模式使用“故事、剧情线、资料、更多”；任意时刻只有一个一级入口高亮，模式切换只出现在“更多”中，写作与游戏分别恢复自己的工作状态。
+- Mobile Workbench v2 replaces the legacy mobile layout: Writing uses Manuscript / Project / Agent / More, and Game uses Story / Timeline / Lore / More; exactly one primary destination stays highlighted, mode switching lives only under More, and each mode restores its own workspace state.
+- Agent 上下文交接：发送前在输入区显示来源、用途、版本和 UTF-8 大小，并支持移除；后端按实际内容重新计算字节数，不信任客户端上报，并拒绝超过上限的交接。
+- Agent context handoffs are now explicit: the composer shows source, purpose, version, and UTF-8 size before sending, with a remove action; the backend recomputes bytes from the content and rejects handoffs above the configured limit.
+- 新增用户级设置 `agent_context_handoff_limit_kb`，默认 256 KB，可在设置中调整；工作区配置不会覆盖该上限。
+- Added the user-level `agent_context_handoff_limit_kb` setting (default 256 KB, editable in Settings); workspace config cannot override this safety limit.
+- Agent、互动故事与配置 Agent 运行接入统一的可持续后台任务：切换或移除项目时旧版本服务改为退役而不是立即关闭，任务完成前保留可恢复运行状态。
+- Agent, Interactive Story, and Config Agent runs now use the durable background task registry: leaving or switching a project retires the old Version Service instead of closing it immediately, keeping recoverable run state until the task finishes.
+- 互动故事支持状态修订、撤销/恢复与分支；故事回合提交时携带上下文快照，历史修改通过修订或创建分支完成。
+- Interactive stories now support state revisions, undo/restore, and branches; each turn commits a context snapshot, and history changes go through revisions or new branches.
+- 状态修订界面本地化：非法值提示随应用语言显示，修订历史日期跟随所选语言，布尔字段改用“是/否”选择控件而不是手输文本。
+- The state revision editor is now localized: invalid-value messages follow the app language, history dates use the selected locale, and boolean fields use Yes/No selects instead of raw text input.
+- 批量资料图片生成等长时间图片任务现在会出现在任务中心：运行期间显示来源项目与状态，点击任务可切回源项目；任务中心类型标签已支持图片生成。
+- Long-running image work such as batch lore image generation now appears in the Task Center: the source project and status are visible while running, and tapping the task switches back to the source project; the Task Center already renders the image generation type label.
+- 移动端统一返回增加键盘路径：任务中心打开时按 Esc 与顶部返回键效果一致；状态修订等全屏子工作面按 Esc 走同一返回流程，存在未保存变更时仍先弹出确认。
+- The mobile unified back stack now handles the keyboard: Esc closes the Task Center exactly like the header back control, and full-screen sub-workbenches such as the state revision editor use the same Esc flow with unsaved-change confirmation intact.
+- 新增用户级设置“系统通知”，默认关闭；应用不会在首次启动时请求通知权限，工作区配置也不能覆盖该偏好，应用内任务中心始终可用。
+- Added a user-level System Notifications preference, off by default; the app never requests notification permission on first launch, workspace config cannot override it, and the in-app Task Center always remains available.
+- 全屏变更审阅工作面支持 Esc 关闭，与审阅区关闭按钮走同一返回路径，便于手机键盘与系统返回习惯保持一致。
+- The full-screen change review surface now closes with Esc, sharing the same return path as its close control so keyboard and system back habits stay consistent on mobile.
+- 编辑器断线保存草稿开始本机持久化：网络失败时，未保存内容会按创作项目、文件与基础版本存入浏览器本地存储（单条上限 256 KB、最多 20 条、同文件只保留最新），供重连后校验与恢复；HTTP 域错误（如 409 冲突）不会被误判为离线草稿。
+- Editor drafts that fail to save while offline are now persisted locally: the unsaved content is bound to the project, file, and base revision in browser storage (256 KB per draft, 20 drafts max, one latest draft per file), ready for reconnect validation and recovery; HTTP domain errors such as 409 conflicts are never treated as offline drafts.
+- 编辑器重新打开有本地待同步草稿的文档时会自动恢复草稿，并继续使用草稿记录的基础版本发起保存：若服务端已前移，现有冲突校验与审阅流程会接管；保存成功后清除该文件的待同步草稿。
+- Reopening a document with a locally pending offline draft restores that draft and saves it against the recorded base revision: if the server has moved on, the existing conflict validation and review flow takes over, and the pending draft is cleared after a successful save.
+- 浏览器恢复在线时，编辑器的待同步草稿会自动立即重试，无需用户重新输入或手动保存。
+- When the browser comes back online, pending editor drafts retry immediately without requiring the user to retype or save manually.
+- 待同步草稿现在同时记录编辑所基于的服务端内容，重连后若服务端版本已前移，会按三方合并进入既有冲突审阅流程而不是静默覆盖离线修改。
+- Pending offline drafts now also record the server content the edit was based on; when the server revision has moved on after reconnecting, the draft goes through the existing three-way merge conflict review instead of silently overwriting the offline edit.
+- 小说导入结果现在会登记为任务中心里的导入导出任务：完成后可点击切回新建书籍工作区，失败任务也会保留错误信息。
+- Novel import results now appear in the Task Center as import/export tasks: completed imports can be reopened by switching to the new book workspace, and failed imports retain their error message.
+
+### Changed
+
+- 移动端统一任务中心：Agent 运行、互动故事与自动化等长时间操作集中为可恢复任务，任务中心可从“更多”打开，顶部返回键与浏览器返回走同一路径。
+- The mobile Task Center unifies long-running work: Agent runs, interactive stories, and automations are recoverable tasks opened from More, and the header back control and browser back share the same return path.
+- 统一返回栈覆盖移动工作台表层导航；任务中心等子工作面使用具名历史层，避免一级入口切换污染浏览器历史。
+- The unified back stack now covers mobile shell navigation; sub-workbenches such as the Task Center push named history entries, and primary destination switches no longer pollute browser history.
+
 ## [v0.3.3] - 2026-07-25
 
 ### Fixed

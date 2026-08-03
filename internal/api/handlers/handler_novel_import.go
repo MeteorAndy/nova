@@ -123,6 +123,7 @@ func (h *Handlers) HandleNovelImport(ctx context.Context, c *app.RequestContext)
 	preview, err := book.PreviewNovelImport(filename, data, opts)
 	if err != nil {
 		log.Printf("[api] 小说导入确认 preview failed filename=%q err=%v", filename, err)
+		h.app.RecordNovelImportResult("", filename, err)
 		writeErrorKey(c, consts.StatusBadRequest, "api.novelImport.parseFailed", "detail", err.Error())
 		return
 	}
@@ -157,11 +158,13 @@ func (h *Handlers) HandleNovelImport(ctx context.Context, c *app.RequestContext)
 	importPreview, paths, err := book.ImportNovelToWorkspace(workspace, filename, data, opts)
 	if err != nil {
 		log.Printf("[api] 小说导入确认 import failed filename=%q workspace=%q err=%v", filename, workspace, err)
+		h.app.RecordNovelImportResult(workspace, title, err)
 		writeErrorKey(c, consts.StatusInternalServerError, "api.novelImport.importFailed", "detail", err.Error())
 		return
 	}
 
 	log.Printf("[api] 导入小说完成 workspace=%q strategy=%s regex=%q chapters=%d paths=%d warnings=%v", workspace, importPreview.SplitStrategy, importPreview.SplitRegex, importPreview.ChapterCount, len(paths), importPreview.Warnings)
+	h.app.RecordNovelImportResult(workspace, title, nil)
 	writeJSON(c, consts.StatusOK, book.NovelImportResult{
 		Workspace:    workspace,
 		BookMeta:     &meta,

@@ -155,6 +155,35 @@ describe('InputArea command menu', () => {
     expect(handleRemove).toHaveBeenCalledWith(expect.objectContaining({ reviewThreadId: 'review-1' }), 'comment-1')
   })
 
+  it('shows explicit handoff metadata and exposes an accessible remove action', async () => {
+	const user = userEvent.setup()
+	const handleRemove = vi.fn()
+	render(
+	  <InputArea
+		onSend={vi.fn()}
+		disabled={false}
+		textSelections={[{
+		  fileName: 'chapters/ch01.md',
+		  startLine: 2,
+		  endLine: 3,
+		  content: '你好',
+		  source: 'editor_selection',
+		  purpose: 'ask_agent',
+		  version: 'revision-7',
+		}]}
+		onTextSelectionRemove={handleRemove}
+	  />,
+	)
+
+	expect(screen.getByText('编辑器选区')).toBeInTheDocument()
+	expect(screen.getByText('询问 Agent')).toBeInTheDocument()
+	expect(screen.getByText('revision-7')).toBeInTheDocument()
+	expect(screen.getByText('6 bytes')).toBeInTheDocument()
+
+	await user.click(screen.getByRole('button', { name: '移除上下文交接：chapters/ch01.md' }))
+	expect(handleRemove).toHaveBeenCalledWith(0)
+  })
+
   it('restores supplemental instructions when a review-feedback request is rejected', async () => {
     const user = userEvent.setup()
     const handleSend = vi.fn().mockResolvedValue(false)

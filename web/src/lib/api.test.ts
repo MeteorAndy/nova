@@ -15,6 +15,7 @@ import {
   switchSession,
 } from './api'
 import { server } from '@/test/msw/server'
+import { abortInteractiveChat } from '@/features/interactive/api'
 
 describe('api', () => {
   it('作品统计接口将空章节列表标准化为空数组', async () => {
@@ -228,5 +229,19 @@ describe('api', () => {
     )
 
     await expect(sendMessage('失败场景')).rejects.toThrow('HTTP 502')
+  })
+
+  it('停止互动故事运行时携带来源故事和分支', async () => {
+    let requestPath = ''
+    server.use(
+      http.post('/api/interactive/chat/abort', ({ request }) => {
+        requestPath = new URL(request.url).pathname + new URL(request.url).search
+        return HttpResponse.json({ status: 'ok' })
+      }),
+    )
+
+    await abortInteractiveChat('story-harbor', 'night')
+
+    expect(requestPath).toBe('/api/interactive/chat/abort?story_id=story-harbor&branch=night')
   })
 })

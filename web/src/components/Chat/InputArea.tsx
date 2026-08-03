@@ -29,6 +29,7 @@ import {
 import { useKeyboardInset } from '@/hooks/useKeyboardInset'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { ReviewFeedbackTray, reviewFeedbackCommentCount, type ReviewFeedbackBatch, type ReviewFeedbackComment, type ReviewFeedbackSelection } from '@/features/changes/agent/ReviewFeedbackTray'
+import { ContextHandoffTray } from './ContextHandoffTray'
 
 /** 可用命令列表 */
 const COMMANDS: Array<{ cmd: string; descKey: string; hintKey: string; icon: LucideIcon }> = [
@@ -554,32 +555,7 @@ export function InputArea({
               <ReviewFeedbackTray feedback={reviewFeedback} onOpen={onReviewFeedbackOpen} onRemove={onReviewFeedbackRemove} />
             ) : null}
             {textSelections.length > 0 && (
-              <div className="mb-2 flex flex-wrap gap-1.5">
-                {textSelections.map((sel, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex max-w-full items-center gap-1 rounded-md bg-[var(--nova-success-bg)] px-2 py-0.5 text-xs text-[var(--nova-success)]"
-                  >
-                    <span className="truncate">
-                      {sel.fileName}:L{sel.startLine}
-                      {sel.endLine !== sel.startLine && `-L${sel.endLine}`}
-                      {' '}
-                      <span className="text-[var(--nova-success-muted)]">
-                        {sel.content.length > 30 ? sel.content.slice(0, 30) + '…' : sel.content}
-                      </span>
-                    </span>
-                    {onTextSelectionRemove && (
-                      <button
-                        type="button"
-                        className="rounded text-[var(--nova-success-muted)] hover:text-[var(--nova-text)]"
-                        onClick={() => onTextSelectionRemove(idx)}
-                      >
-                        ×
-                      </button>
-                    )}
-                  </span>
-                ))}
-              </div>
+              <ContextHandoffTray selections={textSelections} onRemove={onTextSelectionRemove} />
             )}
           </>
         ) : undefined}

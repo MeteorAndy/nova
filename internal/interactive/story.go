@@ -601,6 +601,7 @@ func (s *Store) AppendTurn(storyID string, req AppendTurnRequest) (TurnEvent, er
 		Thinking:             strings.TrimSpace(req.Thinking),
 		DisplayEvents:        sanitizeDisplayEvents(req.DisplayEvents),
 		ModelContextMessages: sanitizeModelContextMessages(req.ModelContextMessages),
+		ContextSnapshot:      sanitizeTurnContextSnapshot(req.ContextSnapshot),
 		Flags:                map[string]bool{"pinned": false, "locked": false},
 	}
 	branch.Head = event.ID
@@ -666,6 +667,7 @@ func (s *Store) AppendTurnWithState(storyID string, req AppendTurnWithStateReque
 		AgentKind:            strings.TrimSpace(req.AgentKind),
 		DisplayEvents:        sanitizeDisplayEvents(req.DisplayEvents),
 		ModelContextMessages: sanitizeModelContextMessages(req.ModelContextMessages),
+		ContextSnapshot:      sanitizeTurnContextSnapshot(req.ContextSnapshot),
 		RuleResolution:       normalizeRuleResolutionPointer(req.RuleResolution),
 		TurnResult:           turnResult,
 		TerminalOutcome:      normalizeTerminalOutcomePointer(req.TerminalOutcome),
@@ -1359,6 +1361,16 @@ func stateFromPath(path []StoryEventRecord) map[string]any {
 					applyActorStateOp(state, op)
 				}
 			}
+		case StoryEventTypeStateRevision:
+			var revision StateRevisionEvent
+			if err := mapToStruct(record.Raw, &revision); err == nil {
+				for _, op := range revision.Ops {
+					applyStateOp(state, op)
+				}
+				for _, op := range revision.ActorOps {
+					applyActorStateOp(state, op)
+				}
+			}
 		}
 	}
 	return state
@@ -1388,6 +1400,16 @@ func stateBeforeTurn(path []StoryEventRecord, turnID string) map[string]any {
 					applyStateOp(state, op)
 				}
 				for _, op := range turn.StateDelta.ActorOps {
+					applyActorStateOp(state, op)
+				}
+			}
+		case StoryEventTypeStateRevision:
+			var revision StateRevisionEvent
+			if err := mapToStruct(record.Raw, &revision); err == nil {
+				for _, op := range revision.Ops {
+					applyStateOp(state, op)
+				}
+				for _, op := range revision.ActorOps {
 					applyActorStateOp(state, op)
 				}
 			}

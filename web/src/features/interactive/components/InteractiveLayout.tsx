@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Gauge, GripHorizontal, GripVertical } from 'lucide-react'
+import { GripHorizontal, GripVertical } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
 import { Group, Panel, Separator } from 'react-resizable-panels'
@@ -21,9 +21,9 @@ import {
 } from './story-state/display-preference'
 import { novaEase, panelPresence, subtlePresence } from '@/features/motion/motion-tokens'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { MobilePaneHost } from '@/components/layout/mobile-pane-host'
 import type { ImagePreset, InteractiveTurnPersistedEvent, Snapshot, StoryDirector, StoryImageSettings, StorySummary } from '../types'
 import { INTERACTIVE_OPENING_PRESET_PATH, INTERACTIVE_OPENING_PRESET_UPDATED_EVENT, LEGACY_INTERACTIVE_OPENING_PRESET_PATH, parseBookOpeningPresets, type BookOpeningPreset, type StoryCreateInput } from '../opening'
+import { INTERACTIVE_STORY_RECOVERY_EVENT, consumeInteractiveStoryRecovery, type InteractiveStoryRecoveryTarget } from '@/features/mobile-workbench/task-recovery-navigation'
 
 interface InteractiveLayoutProps {
   workspace?: string
@@ -91,7 +91,6 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
   const lastStableSnapshotRef = useRef<Snapshot | null>(null)
   const [snapshotLoading, setSnapshotLoading] = useState(false)
   const [snapshotLoadFailed, setSnapshotLoadFailed] = useState(false)
-  const [mobileSnapshotOpen, setMobileSnapshotOpen] = useState(false)
   const [storyStateDisplayPreference, setStoryStateDisplayPreference] = useState(readStoryStateDisplayPreference)
   const [bookOpeningPresets, setBookOpeningPresets] = useState<BookOpeningPreset[]>([])
 
@@ -170,6 +169,24 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
     [currentBranchId, currentStoryId, setBranches, setSnapshot],
   )
 
+  const recoverInteractiveStory = useCallback(async (target: InteractiveStoryRecoveryTarget) => {
+    try {
+      await selectInteractiveStory(target.storyId)
+      await switchInteractiveBranch(target.storyId, target.branchId)
+      setCurrentStoryId(target.storyId)
+      setCurrentBranchId(target.branchId)
+      setSubmode('story')
+      await reloadSnapshot(target.branchId, target.storyId)
+    } catch (error) {
+      console.error('[interactive-layout] 恢复后台故事任务失败', {
+        storyId: target.storyId,
+        branchId: target.branchId,
+        taskId: target.taskId,
+        error,
+      })
+    }
+  }, [reloadSnapshot, setCurrentBranchId, setCurrentStoryId, setSubmode])
+
   useEffect(() => {
     storyIndexRequestSeqRef.current += 1
     snapshotRequestSeqRef.current += 1
@@ -180,6 +197,18 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
     }
     void Promise.all([reloadStories(), getInteractiveTellers().then(setTellers), getStoryDirectors().then(setStoryDirectors)])
   }, [reloadStories, resetWorkspaceState, setStoryDirectors, setTellers, workspace])
+
+  useEffect(() => {
+    const recover = (event: Event) => {
+      const target = consumeInteractiveStoryRecovery()
+        || (event as CustomEvent<InteractiveStoryRecoveryTarget>).detail
+      if (target?.storyId && target.branchId) void recoverInteractiveStory(target)
+    }
+    window.addEventListener(INTERACTIVE_STORY_RECOVERY_EVENT, recover)
+    const queuedTarget = consumeInteractiveStoryRecovery()
+    if (queuedTarget?.storyId && queuedTarget.branchId) void recoverInteractiveStory(queuedTarget)
+    return () => window.removeEventListener(INTERACTIVE_STORY_RECOVERY_EVENT, recover)
+  }, [recoverInteractiveStory])
 
   useEffect(() => {
     void reloadBookOpeningPreset()
@@ -225,10 +254,6 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [active, reloadSnapshot, snapshot?.branch_id, snapshot?.current_turn?.id, snapshot?.current_turn?.state_status, snapshot?.director_plan_status?.status, snapshot?.turns?.length])
-
-  useEffect(() => {
-    if (!isMobile || submode !== 'story') setMobileSnapshotOpen(false)
-  }, [isMobile, submode])
 
   const handleCreateStory = async (input: StoryCreateInput) => {
     const story = await createInteractiveStory(input)
@@ -317,11 +342,11 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
 
   const openDirectorState = useCallback(() => {
     if (isMobile) {
-      setMobileSnapshotOpen(true)
+      setSubmode('director')
       return
     }
     if (!rightPanelVisible) onToggleRightPanel?.()
-  }, [isMobile, onToggleRightPanel, rightPanelVisible])
+  }, [isMobile, onToggleRightPanel, rightPanelVisible, setSubmode])
 
   const handleTurnPersisted = useCallback((event: InteractiveTurnPersistedEvent) => {
     return applyTurnPersisted(event) || undefined
@@ -362,7 +387,7 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
   const settingMode: SettingPanelMode = submode === 'story' || submode === 'timeline' || submode === 'director' ? 'lore' : submode
   const settingsWorkspaceVisible = submode !== 'story' && submode !== 'timeline' && submode !== 'director'
   const contentKey = settingsWorkspaceVisible ? `settings:${settingMode}` : submode
-  const directorPanelVisible = isMobile ? mobileSnapshotOpen : rightPanelVisible
+  const directorPanelVisible = !isMobile && rightPanelVisible
   const storyStage = (
     <StoryStage
       workspace={workspace}
@@ -384,15 +409,15 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
       onStoryCreate={handleCreateStory}
       onStorySetupUpdate={handleStorySetupUpdate}
       onStoryDelete={handleDeleteStories}
+      onCreateBranch={handleCreateBranch}
       onDirectorChange={handleDirectorChange}
       onReplyTargetCharsChange={handleReplyTargetCharsChange}
       onImageSettingsChange={handleImageSettingsChange}
       onRequestLoreInit={onRequestLoreInit}
       onOpenDirectorConfig={() => {
         setSubmode('teller')
-        setMobileSnapshotOpen(false)
       }}
-      onToggleDirectorPanel={isMobile ? () => setMobileSnapshotOpen((open) => !open) : onToggleRightPanel}
+      onToggleDirectorPanel={isMobile ? () => setSubmode('director') : onToggleRightPanel}
       onOpenDirectorState={openDirectorState}
       onStateDisplayPreferenceChange={handleStoryStateDisplayPreferenceChange}
       onTurnPersisted={handleTurnPersisted}
@@ -412,21 +437,7 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
               ) : submode === 'timeline' ? (
                 <BranchTimeline snapshot={displaySnapshot} branches={branches} currentBranchId={currentBranchId} onSwitchBranch={handleSwitchBranch} onCreateBranch={handleCreateBranch} onDeleteBranch={handleDeleteBranch} fill variant="workspace" onBackToStory={() => setSubmode('story')} headerControls={<StoryPicker stories={stories} currentStoryId={currentStoryId} onSelect={handleStorySelect} onCreate={() => undefined} onDeleteStories={handleDeleteStories} hideCreate />} />
               ) : isMobile ? (
-                <MobilePaneHost
-                  panes={[{
-                    id: 'director-panel',
-                    title: t('directorPanel.title'),
-                    side: 'right',
-                    icon: <Gauge className="h-4 w-4" />,
-                    content: <DirectorPanel storyId={currentStoryId} story={currentStory} storyDirectors={storyDirectors} onDirectorChange={handleDirectorChange} onReplyTargetCharsChange={handleReplyTargetCharsChange} branchId={currentBranchId} snapshot={displaySnapshot} stateDisplayPreference={storyStateDisplayPreference} onStateDisplayPreferenceChange={handleStoryStateDisplayPreferenceChange} />,
-                  }]}
-                  closeLabel={t('common.close')}
-                  openPaneId={mobileSnapshotOpen ? 'director-panel' : null}
-                  onOpenPaneChange={(id) => setMobileSnapshotOpen(id === 'director-panel')}
-                  className="relative flex min-h-0 flex-1"
-                >
-                  {storyStage}
-                </MobilePaneHost>
+                storyStage
               ) : (
                 <Group id="nova-interactive-horizontal" defaultLayout={readStoredLayout('nova-interactive-horizontal')} onLayoutChanged={(layout) => storeLayout('nova-interactive-horizontal', layout)} orientation="horizontal" className="min-h-0 flex-1">
                   <Panel id="story-stage" minSize="240px" className="min-w-0">

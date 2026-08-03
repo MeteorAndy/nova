@@ -200,6 +200,59 @@ describe('StoryStage AI reply editing', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(sendInteractiveMessageMock).not.toHaveBeenCalled()
   })
+
+  it('creates a branch from a historical reply and reserves revision for the latest turn', async () => {
+    const user = userEvent.setup()
+    const onCreateBranch = vi.fn().mockResolvedValue(undefined)
+    const firstTurn: TurnEvent = {
+      id: 'turn-first',
+      parent_id: null,
+      branch_id: 'main',
+      ts: '2026-06-28T00:00:00Z',
+      user: '打开大门',
+      narrative: '门后是一条长廊。',
+    }
+    const latestTurn: TurnEvent = {
+      id: 'turn-latest',
+      parent_id: firstTurn.id,
+      branch_id: 'main',
+      ts: '2026-06-28T00:01:00Z',
+      user: '走进长廊',
+      narrative: '脚步声在石墙间回荡。',
+    }
+
+    render(
+      <VirtuosoMockContext.Provider value={{ viewportHeight: 1200, itemHeight: 120 }}>
+        <StoryStage
+          workspace="/tmp/book"
+          stories={[story()]}
+          story={story()}
+          tellers={[]}
+          storyId="story-1"
+          branchId="main"
+          snapshot={{
+            story_id: 'story-1',
+            branch_id: 'main',
+            turns: [firstTurn, latestTurn],
+            current_turn: latestTurn,
+            state: {},
+          }}
+          onCreateBranch={onCreateBranch}
+          onDone={() => undefined}
+        />
+      </VirtuosoMockContext.Provider>,
+    )
+
+    expect(screen.getAllByRole('button', { name: '编辑 AI 回复' })).toHaveLength(1)
+    await user.click(screen.getByRole('button', { name: '从此回合创建剧情线' }))
+    expect(screen.getByRole('dialog', { name: '从历史回合创建剧情线' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '创建并切换' }))
+    await waitFor(() => {
+      expect(onCreateBranch).toHaveBeenCalledWith('turn-first', expect.any(String))
+    })
+    expect(updateInteractiveTurnNarrativeMock).not.toHaveBeenCalled()
+  })
 })
 
 describe('StoryStage current state ledger', () => {
