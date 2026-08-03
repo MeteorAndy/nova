@@ -211,6 +211,10 @@ describe('api', () => {
         start_line: 1,
         end_line: 2,
         content: '选中文本',
+        source: 'editor_selection',
+        purpose: 'ask_agent',
+        version: 'unversioned',
+        size_bytes: 12,
       }],
       ide_context: {
         current_file: 'chapters/ch02.md',
