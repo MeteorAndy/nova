@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
@@ -20,6 +20,7 @@ import type { RightPanel, WorkspaceMode } from '@/stores/workspace-store'
 import type { InteractiveSubmode } from '@/features/interactive/types'
 import { formatNumber } from './workbench-utils'
 import { formatDateTime } from '@/i18n'
+import { maybeNotifyActionableTask } from '@/lib/task-notifications'
 import { BookSwitcher } from './BookSwitcher'
 import { WorkbenchNoticePill } from './WorkbenchNoticePill'
 import type { WorkbenchNotice } from '@/features/notices/use-workbench-notice'
@@ -57,6 +58,7 @@ interface WorkbenchShellProps {
   onCloseSettings: () => void
   onQuickSwitchBook: (path: string) => Promise<boolean>
   onDismissNotice?: () => void
+  systemNotificationsEnabled?: boolean
 }
 
 type ActivityItemId = 'writing' | 'story' | 'timeline' | 'lore' | 'teller' | 'versions' | 'books' | 'skills' | 'agents' | 'automations'
@@ -133,6 +135,7 @@ export function WorkbenchShell({
   onCloseSettings,
   onQuickSwitchBook,
   onDismissNotice,
+  systemNotificationsEnabled = false,
 }: WorkbenchShellProps) {
   const { t } = useTranslation()
   const isMobile = useIsMobile()
@@ -142,6 +145,7 @@ export function WorkbenchShell({
     result: EMPTY_TASK_CENTER,
     loadState: 'loading',
   })
+  const notifiedTaskIDsRef = useRef(new Set<string>())
   const [mainContentHost] = useState(() => {
     const host = createStablePortalHost('h-full min-h-0 w-full min-w-0 overflow-hidden')
     if (host) host.dataset.novaWorkbenchMainHost = 'true'
@@ -185,6 +189,16 @@ export function WorkbenchShell({
         const result = await getTasks()
         if (cancelled) return
         setTaskActivity({ result, loadState: 'ready' })
+        for (const task of result.tasks) {
+          if (task.status !== 'waiting_user' && task.status !== 'failed') continue
+          if (notifiedTaskIDsRef.current.has(task.id)) continue
+          notifiedTaskIDsRef.current.add(task.id)
+          void maybeNotifyActionableTask({
+            enabled: systemNotificationsEnabled,
+            typeLabel: t(`workbench.mobile.taskCenter.type.${task.type}`),
+            projectName: task.project.name,
+          })
+        }
       } catch {
         if (!cancelled) {
           setTaskActivity((current) => ({ ...current, loadState: 'error' }))

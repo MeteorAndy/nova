@@ -71,6 +71,7 @@ function App() {
   const [editorAutoSaveDelayMs, setEditorAutoSaveDelayMs] = useState(AUTO_SAVE_DELAY_FALLBACK_MS)
   const [updateCheckEnabled, setUpdateCheckEnabled] = useState<boolean | null>(null)
   const [motionIntensity, setMotionIntensity] = useState('system')
+  const [systemNotificationsEnabled, setSystemNotificationsEnabled] = useState(false)
   const [novaDir, setNovaDir] = useState('')
   const [sidebarView, setSidebarView] = useState<SidebarView>('outline')
   const [editorSearchIntent, setEditorSearchIntent] = useState<{ path: string; query: string; line: number; nonce: number } | null>(null)
@@ -261,6 +262,7 @@ function App() {
           setConfiguredLocale(effective?.language)
           setTheme(normalizeAppTheme(effective?.theme))
           setMotionIntensity(normalizeMotionIntensity(effective?.motion_intensity))
+          setSystemNotificationsEnabled(effective?.system_notifications_enabled === true)
           applyFontSettings(fontSettingsFromEffective(effective))
         })
         .catch((e) => console.warn('加载界面配置失败', e))
@@ -783,6 +785,7 @@ function App() {
         onToggleProjectVisible={() => setProjectVisible((value) => !value)}
         onSetRightPanel={handleSetRightPanel}
         onToggleSettings={() => setSettingsOpen((open) => !open)}
+        systemNotificationsEnabled={systemNotificationsEnabled}
         onCloseSettings={() => setSettingsOpen(false)}
         notice={notice}
         onDismissNotice={dismissNotice}

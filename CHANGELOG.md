@@ -40,6 +40,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Novel import results now appear in the Task Center as import/export tasks: completed imports can be reopened by switching to the new book workspace, and failed imports retain their error message.
 - 小说导入改为后台任务并通过 SSE 流式返回：运行中会出现在任务中心，进度以事件流下发，完成后返回结果；`POST /api/books/import-novel` 的响应从 JSON 改为 SSE。
 - Novel import now runs as a background task streamed over SSE: it appears in the Task Center while running, progress is delivered as events, and the result is returned when done; `POST /api/books/import-novel` now responds with SSE instead of JSON.
+- 系统通知发送能力上线：开启“系统通知”偏好后，等待用户或失败的任务会请求权限并显示只含任务类型与来源项目的通知（不含正文、提示词或工具内容）；同一任务只提醒一次。
+- System notifications are now sent when the preference is enabled: waiting-user or failed tasks request permission and show a notification containing only the task type and source project (never body, prompt, or tool content), with one reminder per task.
 
 ### Changed
 

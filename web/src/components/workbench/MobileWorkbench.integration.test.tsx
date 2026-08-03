@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { setConfiguredLocale } from '@/i18n'
 import type { InteractiveSubmode } from '@/features/interactive/types'
@@ -27,6 +27,10 @@ describe('Mobile Workbench', () => {
     automationNavigation.request.mockClear()
     setConfiguredLocale('zh-CN')
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   it('uses four writing destinations and exposes mode switching only from More', async () => {
@@ -266,6 +270,37 @@ describe('Mobile Workbench', () => {
     expect(onQuickSwitchBook).toHaveBeenCalledWith('/books/imported')
   })
 
+  it('shows a privacy-safe system notification for an actionable task when enabled', async () => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' })
+    vi.stubGlobal('Notification', MockNotification)
+    server.use(
+      http.get('/api/tasks', () => HttpResponse.json({
+        action_required_count: 1,
+        tasks: [
+          {
+            id: 'agent:1',
+            type: 'agent',
+            status: 'waiting_user',
+            title: '会话：请处理草稿中的敏感段落',
+            project: { name: 'project-one', path: '/projects/one' },
+            started_at: '2026-08-04T10:00:00Z',
+            updated_at: '2026-08-04T10:01:00Z',
+            recovery: { kind: 'agent_session', workspace: '/projects/one', session_id: 'session-1', task_id: 'agent:1' },
+          },
+        ],
+      })),
+    )
+
+    render(<WorkbenchShell {...workbenchProps(<div>正文内容</div>)} systemNotificationsEnabled />)
+
+    await waitFor(() => {
+      expect(MockNotification.instances).toHaveLength(1)
+    })
+    expect(MockNotification.instances[0].title).toBe('Agent · project-one')
+    expect(MockNotification.instances[0].options?.body).toBeUndefined()
+    expect(MockNotification.instances[0].title).not.toContain('敏感')
+  })
+
   it('uses the same return path for the task center header and browser back', async () => {
     const user = userEvent.setup()
     render(<WorkbenchShell {...workbenchProps(<div>正文内容</div>)} />)
@@ -455,6 +490,15 @@ class MockVisualViewport extends EventTarget {
   constructor(height: number) {
     super()
     this.height = height
+  }
+}
+
+class MockNotification {
+  static permission: NotificationPermission = 'granted'
+  static instances: Array<{ title: string; options?: NotificationOptions }> = []
+
+  constructor(title: string, options?: NotificationOptions) {
+    MockNotification.instances.push({ title, options })
   }
 }
 

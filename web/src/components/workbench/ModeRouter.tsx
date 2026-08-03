@@ -136,6 +136,7 @@ interface ModeRouterProps {
   onApproveProposedPlan: (ref: AgentPartRef) => void
   onExitChatPlanMode: () => void
   onDismissNotice?: () => void
+  systemNotificationsEnabled?: boolean
 }
 
 export function ModeRouter(props: ModeRouterProps) {
@@ -233,6 +234,7 @@ export function ModeRouter(props: ModeRouterProps) {
     onApproveProposedPlan,
     onExitChatPlanMode,
     onDismissNotice,
+    systemNotificationsEnabled = false,
   } = props
 
   const activeTab = openTabs.find((tab) => tabKey(tab) === activeTabKey) ?? null
@@ -838,6 +840,7 @@ export function ModeRouter(props: ModeRouterProps) {
       onCloseSettings={onCloseSettings}
       onQuickSwitchBook={quickSwitchBook}
       onDismissNotice={onDismissNotice}
+      systemNotificationsEnabled={systemNotificationsEnabled}
     />
   )
 }
