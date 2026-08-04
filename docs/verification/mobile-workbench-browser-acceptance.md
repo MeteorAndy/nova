@@ -30,9 +30,19 @@
 
 - Applying `zoom: 2` produces no horizontal overflow (`document.documentElement.scrollWidth` stays at viewport width).
 
+## Landscape (2026-08-04)
+
+| Viewport | Locale | Theme | Horizontal overflow | Primary navigation |
+| --- | --- | --- | --- | --- |
+| 844x390 | zh-CN | dark | none | 正文 / 项目 / Agent / 更多 |
+| 932x430 | zh-CN | dark | none | 正文 / 项目 / Agent / 更多 |
+| 844x390 | en-US | light | none | Manuscript / Project / Agent / More |
+| 1180x820 | zh-CN | dark | none | desktop activity bar |
+| 1280x800 | zh-CN | dark | none | desktop activity bar |
+
 ## Notes and limitations
 
 - The acceptance ran against a fresh local workspace (`acceptance-book`) with no chapters, so it covers shell/navigation/layout rather than long-form editor content.
 - Pixel-level visual review was not possible in this session; layout invariants and interactions were verified programmatically via CDP.
 - A 404 for the missing book cover image was observed; it is expected for a book without a cover and is not a layout defect.
-- Landscape, safe-area, and system-notification permission flows were not covered by this run.
+- Safe-area insets and system-notification permission flows still require a real device or browser permission emulation and were not covered by this run.
