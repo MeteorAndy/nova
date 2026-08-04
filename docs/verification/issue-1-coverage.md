@@ -122,7 +122,7 @@
 | 97 | Rotation keeps editor/session mounted | ✅ | adaptive-surface + stable host tests |
 | 98 | Coarse pointer keeps touch targets | 🟡 | min-h-12/44px targets in shell; not measured |
 | 99 | Complete Simplified Chinese copy | ✅ | i18n alignment + zh browser run |
-| 100 | English long-text no truncation/overlap | 🟡 | en browser run; long-text case not run |
+| 100 | English long-text no truncation/overlap | ✅ | long-English book name browser case (320/390/430) |
 | 101 | Screen-reader semantics | 🟡 | aria labels present; SR audit not run |
 | 102 | Keyboard core flows | ✅ | Escape/Tab focus tests + keyboard nav tests |
 | 103 | 200% font zoom accessibility | ✅ | zoom acceptance (CSS zoom 2x, no overflow) |

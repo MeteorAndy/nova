@@ -40,6 +40,14 @@
 | 1180x820 | zh-CN | dark | none | desktop activity bar |
 | 1280x800 | zh-CN | dark | none | desktop activity bar |
 
+## Long English book name (2026-08-04)
+
+| Width | Horizontal overflow | Switcher accessible name | Primary navigation |
+| --- | --- | --- | --- |
+| 320 | none | full long title preserved | 正文 / 项目 / Agent / 更多 |
+| 390 | none | full long title preserved | 正文 / 项目 / Agent / 更多 |
+| 430 | none | full long title preserved | 正文 / 项目 / Agent / 更多 |
+
 ## Notes and limitations
 
 - The acceptance ran against a fresh local workspace (`acceptance-book`) with no chapters, so it covers shell/navigation/layout rather than long-form editor content.
