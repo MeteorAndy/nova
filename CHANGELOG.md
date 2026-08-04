@@ -44,6 +44,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - System notifications are now sent when the preference is enabled: waiting-user or failed tasks request permission and show a notification containing only the task type and source project (never body, prompt, or tool content), with one reminder per task.
 - 故事舞台行动建议默认直接显示最多三项，点击只填入输入框不直接发送；超过三项时提供“更多选择”入口展开其余建议。
 - Story stage action suggestions now show up to three directly by default and only fill the composer when tapped; a “More choices” entry reveals the rest when there are more than three.
+- 完成移动工作台浏览器验收：320–1280px 七档宽度在中文/英文、深色/浅色下均无横向溢出，四入口导航正确，任务中心 Esc 返回路径与 200% 缩放通过。
+- Mobile Workbench browser acceptance completed: 320–1280px in zh/en and dark/light show no horizontal overflow, the four-destination navigation is correct, and the Task Center Escape back path plus 200% zoom pass.
 
 ### Changed
 

@@ -13,6 +13,8 @@ denova-test.exe
 nova-windows-test/
 nova-test.exe
 data/
+.denova/
+.nova/
 web/node_modules/
 node_modules/
 .scratch-*/
@@ -30,6 +32,8 @@ docs/architecture/*
 !docs/architecture/mobile-workbench-v2-design.md
 !docs/specs/
 !docs/specs/mobile-workbench-v2-spec.md
+!docs/verification/
+!docs/verification/*.md
 !docs/status/
 docs/status/*
 !docs/status/actor-state-presets-v2-design.md
