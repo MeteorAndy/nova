@@ -321,6 +321,51 @@ describe('Mobile Workbench', () => {
     expect(within(navigation).getByRole('button', { name: '更多' })).toHaveAttribute('aria-current', 'page')
   })
 
+  it('aborts task recovery when the source project switch fails', async () => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' })
+    server.use(
+      http.get('/api/tasks', () => HttpResponse.json({
+        action_required_count: 1,
+        tasks: [
+          {
+            id: 'agent:blocked',
+            type: 'agent',
+            status: 'waiting_user',
+            title: 'Blocked session',
+            project: { name: 'project-one', path: '/projects/one' },
+            started_at: '2026-08-04T10:00:00Z',
+            updated_at: '2026-08-04T10:01:00Z',
+            recovery: { kind: 'agent_session', workspace: '/projects/one', session_id: 'session-1', task_id: 'agent:blocked' },
+          },
+        ],
+      })),
+    )
+    const user = userEvent.setup()
+    const onQuickSwitchBook = vi.fn().mockResolvedValue(false)
+    const onSetMode = vi.fn()
+    const agentTargets: unknown[] = []
+    const receiveAgent = (event: Event) => agentTargets.push((event as CustomEvent).detail)
+    window.addEventListener('nova:open-agent-session', receiveAgent)
+
+    render(
+      <WorkbenchShell
+        {...workbenchProps(<div>正文内容</div>)}
+        onQuickSwitchBook={onQuickSwitchBook}
+        onSetMode={onSetMode}
+      />,
+    )
+
+    const navigation = screen.getByRole('navigation', { name: '移动端工作台导航' })
+    await user.click(within(navigation).getByRole('button', { name: '更多' }))
+    await user.click(screen.getByRole('button', { name: '任务中心，1 项需要处理' }))
+    await user.click(screen.getByRole('button', { name: '打开任务：Blocked session' }))
+
+    expect(onQuickSwitchBook).toHaveBeenCalledWith('/projects/one')
+    expect(agentTargets).toEqual([])
+    expect(onSetMode).not.toHaveBeenCalledWith('ide')
+    window.removeEventListener('nova:open-agent-session', receiveAgent)
+  })
+
   it('uses the same return path for the task center header and browser back', async () => {
     const user = userEvent.setup()
     render(<WorkbenchShell {...workbenchProps(<div>正文内容</div>)} />)
