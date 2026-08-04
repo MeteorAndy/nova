@@ -301,6 +301,26 @@ describe('Mobile Workbench', () => {
     expect(MockNotification.instances[0].title).not.toContain('敏感')
   })
 
+  it('keeps long book names from covering header and navigation controls', async () => {
+    const user = userEvent.setup()
+    const longName = '很长的书名'.repeat(20)
+    render(
+      <WorkbenchShell
+        {...workbenchProps(<div>正文内容</div>)}
+        currentBookName={longName}
+      />,
+    )
+
+    const switcher = screen.getByRole('button', { name: `切换书籍，当前：${longName}` })
+    expect(switcher).toBeInTheDocument()
+
+    const navigation = screen.getByRole('navigation', { name: '移动端工作台导航' })
+    await user.click(within(navigation).getByRole('button', { name: '更多' }))
+
+    expect(screen.getByRole('group', { name: '模式切换' })).toBeInTheDocument()
+    expect(within(navigation).getByRole('button', { name: '更多' })).toHaveAttribute('aria-current', 'page')
+  })
+
   it('uses the same return path for the task center header and browser back', async () => {
     const user = userEvent.setup()
     render(<WorkbenchShell {...workbenchProps(<div>正文内容</div>)} />)

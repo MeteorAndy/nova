@@ -21,7 +21,7 @@
 | 11 | Save failure stays and shows error | 🟡 | editor error status tests exist; switch-failure path not asserted |
 | 12 | Top bar shows current work object | ✅ | shell header + browser acceptance heading |
 | 13 | Project subtitle opens switcher | ✅ | BookSwitcher + header tests |
-| 14 | Long titles never cover controls | 🟡 | truncate classes present; long-title browser case not run |
+| 14 | Long titles never cover controls | ✅ | MobileWorkbench.integration.test.tsx long-name case |
 | 15 | At most two frequent actions | ✅ | header render structure |
 | 16 | One manuscript document at a time | ✅ | MarkdownEditor isolation tests |
 | 17 | Title opens recent documents | ✅ | Recent documents UI present; API tests |
@@ -58,7 +58,7 @@
 | 43 | Full-screen single-column diff review | ✅ | ChangeReviewWorkspace tests |
 | 44 | Bounded sourced review feedback | ✅ | ReviewFeedbackTray + context tests |
 | 45 | Accept/undo/continue from review | ✅ | review mutation tests |
-| 46 | Return to Agent after review | 🟡 | closeChangeReview wiring; return assertion not present |
+| 46 | Return to Agent after review | ✅ | use-writing-change-review.test.tsx close case |
 | 47 | Runs bound to source project/session | ✅ | API lifecycle tests |
 | 48 | Project switch never kills runs | ✅ | version lease + task registry tests |
 | 49 | Open cross-project run restores source | ✅ | task recovery navigation tests |
