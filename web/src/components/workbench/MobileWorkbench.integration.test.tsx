@@ -386,6 +386,9 @@ describe('Mobile Workbench', () => {
 
     expect(screen.queryByRole('heading', { name: '任务中心' })).not.toBeInTheDocument()
     expect(screen.getByRole('group', { name: '模式切换' })).toBeInTheDocument()
+    await waitFor(() => {
+      expect(document.activeElement).toBe(document.querySelector('[data-mobile-more-button]'))
+    })
   })
 
   it('closes the task center with Escape like the header back control', async () => {
@@ -396,12 +399,18 @@ describe('Mobile Workbench', () => {
     await user.click(within(navigation).getByRole('button', { name: '更多' }))
     await user.click(screen.getByRole('button', { name: '任务中心' }))
     expect(screen.getByRole('heading', { name: '任务中心' })).toBeInTheDocument()
+    await waitFor(() => {
+      expect(document.activeElement).toBe(document.getElementById('mobile-task-center-back'))
+    })
 
     await user.keyboard('{Escape}')
 
     expect(screen.queryByRole('heading', { name: '任务中心' })).not.toBeInTheDocument()
     expect(screen.getByRole('group', { name: '模式切换' })).toBeInTheDocument()
     expect(within(navigation).getByRole('button', { name: '更多' })).toHaveAttribute('aria-current', 'page')
+    await waitFor(() => {
+      expect(document.activeElement).toBe(document.querySelector('[data-mobile-more-button]'))
+    })
   })
 
   it('leaves a shared workspace when a primary destination is selected', async () => {

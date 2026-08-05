@@ -54,6 +54,7 @@ export function MobileMoreMenu({
       if (event.key !== 'Escape') return
       event.preventDefault()
       setTaskCenterOpen(false)
+      restoreFocusToMore()
       if (history.state?.[MOBILE_TASK_CENTER_HISTORY_KEY] === 'task-center') history.back()
     }
     window.addEventListener('keydown', handleEscape)
@@ -68,6 +69,7 @@ export function MobileMoreMenu({
 
   const returnFromTaskCenter = () => {
     setTaskCenterOpen(false)
+    restoreFocusToMore()
     if (history.state?.[MOBILE_TASK_CENTER_HISTORY_KEY] === 'task-center') history.back()
   }
 
@@ -152,9 +154,15 @@ function ModeButton({ active, label, onClick }: { active: boolean; label: string
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`min-h-10 rounded-[6px] px-3 text-xs ${active ? 'bg-[var(--nova-active)] text-[var(--nova-text)]' : 'text-[var(--nova-text-muted)]'}`}
+      className={`min-h-11 rounded-[6px] px-3 text-xs ${active ? 'bg-[var(--nova-active)] text-[var(--nova-text)]' : 'text-[var(--nova-text-muted)]'}`}
     >
       {label}
     </button>
   )
+}
+
+function restoreFocusToMore() {
+  requestAnimationFrame(() => {
+    document.querySelector<HTMLElement>('[data-mobile-more-button]')?.focus()
+  })
 }

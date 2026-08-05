@@ -24,6 +24,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Long-running image work such as batch lore image generation now appears in the Task Center: the source project and status are visible while running, and tapping the task switches back to the source project; the Task Center already renders the image generation type label.
 - 移动端统一返回增加键盘路径：任务中心打开时按 Esc 与顶部返回键效果一致；状态修订等全屏子工作面按 Esc 走同一返回流程，存在未保存变更时仍先弹出确认。
 - The mobile unified back stack now handles the keyboard: Esc closes the Task Center exactly like the header back control, and full-screen sub-workbenches such as the state revision editor use the same Esc flow with unsaved-change confirmation intact.
+- 移动端触控目标补齐至 44px 以上：首次引导卡片动作、顶部书籍切换、任务中心返回与写作/游戏模式切换不再小于建议尺寸，粗指针设备上的 toast 关闭按钮也扩大热区。
+- Mobile touch targets now meet the 44px minimum: first-run card actions, the top-bar book switcher, Task Center back, and the writing/game mode switch are no longer undersized, and the toast close hit area grows on coarse pointers.
+- 任务中心打开时焦点移入返回按钮，Esc 或顶部返回关闭后焦点回到“更多”按钮，键盘与读屏用户不会丢失当前位置。
+- Opening the Task Center moves focus to its back control, and Esc or the header back control returns focus to More, so keyboard and screen-reader users keep their place.
 - 新增用户级设置“系统通知”，默认关闭；应用不会在首次启动时请求通知权限，工作区配置也不能覆盖该偏好，应用内任务中心始终可用。
 - Added a user-level System Notifications preference, off by default; the app never requests notification permission on first launch, workspace config cannot override it, and the in-app Task Center always remains available.
 - 全屏变更审阅工作面支持 Esc 关闭，与审阅区关闭按钮走同一返回路径，便于手机键盘与系统返回习惯保持一致。

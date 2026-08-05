@@ -1,4 +1,5 @@
 import { ArrowLeft, Bot, Clock3, Image, PackageOpen, RefreshCcw, Sparkles } from 'lucide-react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { formatDateTime } from '@/i18n'
@@ -30,13 +31,18 @@ const TYPE_ICON: Record<TaskCenterTaskType, typeof Bot> = {
 export function MobileTaskCenter({ result, loadState, onBack, onOpenTask }: MobileTaskCenterProps) {
   const { t } = useTranslation()
 
+  useEffect(() => {
+    document.getElementById('mobile-task-center-back')?.focus()
+  }, [])
+
   return (
     <section className="flex h-full min-h-0 flex-col" aria-labelledby="mobile-task-center-title">
       <header className="flex min-h-13 shrink-0 items-center gap-2 border-b border-[var(--nova-border)] px-3">
         <button
           type="button"
+          id="mobile-task-center-back"
           onClick={onBack}
-          className="nova-icon-button flex size-9 shrink-0 items-center justify-center text-[var(--nova-text-muted)]"
+          className="nova-icon-button flex min-h-11 w-11! shrink-0 items-center justify-center text-[var(--nova-text-muted)]"
           aria-label={t('workbench.mobile.taskCenter.back')}
         >
           <ArrowLeft className="size-4" />

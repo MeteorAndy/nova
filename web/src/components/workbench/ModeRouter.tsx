@@ -1130,7 +1130,7 @@ function EmptyLoreGuide({
         </div>
         <button
           type="button"
-          className="nova-nav-item rounded-[var(--nova-radius)] border border-[var(--nova-border)] bg-[var(--nova-surface-2)] px-3 py-1.5 text-xs text-[var(--nova-text-muted)] hover:text-[var(--nova-text)]"
+          className="nova-nav-item min-h-11 rounded-[var(--nova-radius)] border border-[var(--nova-border)] bg-[var(--nova-surface-2)] px-3 text-xs text-[var(--nova-text-muted)] hover:text-[var(--nova-text)]"
           onClick={onClick}
         >
           {action}

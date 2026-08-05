@@ -120,6 +120,7 @@ export function MobileWorkbenchShell({
         badgeLabel={moreBadgeLabel}
         active={moreActive}
         placement={isPhone ? 'bottom' : 'side'}
+        moreTrigger
         onClick={() => setMoreOpen(true)}
       />
     </nav>
@@ -175,6 +176,7 @@ function MobileDestinationButton({
   onClick,
   badgeCount = 0,
   badgeLabel,
+  moreTrigger = false,
 }: {
   label: string
   icon: ReactNode
@@ -183,12 +185,14 @@ function MobileDestinationButton({
   onClick: () => void
   badgeCount?: number
   badgeLabel?: string
+  moreTrigger?: boolean
 }) {
   return (
     <button
       type="button"
       aria-label={label}
       aria-current={active ? 'page' : undefined}
+      data-mobile-more-button={moreTrigger ? 'true' : undefined}
       className={`flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-[var(--nova-radius)] px-1 text-[11px] transition-colors ${placement === 'side' ? 'min-h-16 w-full' : 'min-h-12'} ${active ? 'bg-[var(--nova-active)] text-[var(--nova-text)]' : 'text-[var(--nova-text-faint)] hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text-muted)]'}`}
       onClick={onClick}
     >

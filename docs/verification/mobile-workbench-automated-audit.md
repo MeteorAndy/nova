@@ -1,7 +1,7 @@
 # Mobile Workbench v2 Automated Audit
 
-> Date: 2026-08-05
-> Method: headless Chrome (CDP) against the local dev stack (Vite + Denova backend), driven by a temporary Node CDP script under `Z:\nova\.scratch-mobile-audit\` (removed after the run). The script emulated mobile viewports and touch input, overrode CSS safe-area insets through `Emulation.setSafeAreaInsetsOverride`, dumped the AX tree, measured interactive element hit areas, and drove the More / Task Center / Escape flow with real input events.
+> Date: 2026-08-05 (initial run), 2026-08-06 (post-fix regression run)
+> Method: headless Chrome (CDP) against the local dev stack (Vite + Denova backend), driven by a temporary Node CDP script under `Z:\nova\.scratch-mobile-audit\` (removed after the run). The script emulated mobile viewports and touch input, overrode CSS safe-area insets through `Emulation.setSafeAreaInsetsOverride`, dumped the AX tree, measured interactive element hit areas, and drove the More / Task Center / Escape flow. Navigation clicks use DOM clicks so transient toasts cannot block the flow; Escape is dispatched as a real key event.
 
 ## Layout results
 
@@ -32,24 +32,31 @@ The page also ships `viewport-fit=cover` and `env(safe-area-inset-*)` declaratio
 
 Surfaces that meet the 44px+ recommendation: primary nav buttons (48px), More menu items (48-56px), Task Center task rows (80px).
 
-Surfaces below recommendation (all secondary or first-run):
+Measured after the 2026-08-06 fix (390px dark):
 
-| Surface | Control | Size |
-| --- | --- | --- |
-| Top bar | project switcher (切换书籍) | 32px high |
-| More | mode switch 写作模式 / 游戏模式 | 40px high |
-| Task Center | back button (返回更多) | 40x40 |
-| First-run card | 和创作 Agent 聊灵感 | 34px high |
-| First-run card | 跳过引导 pill | 24px high |
-| First-run card | 去配置 | 24px high |
-| Toast | close button | 22x22 |
+| Surface | Control | Before | After |
+| --- | --- | --- | --- |
+| Top bar | project switcher (切换书籍) | 32px | 44px |
+| More | mode switch 写作模式 / 游戏模式 | 40px | 44px |
+| Task Center | back button (返回更多) | 40x40 | 44x44 |
+| First-run card | 和创作 Agent 聊灵感 | 34px | 44px |
+| First-run card | 跳过引导 pill | 24px | 44px |
+| First-run card | 去配置 | 24px | 44px |
+| First-run card | close button | 24x24 | 44x44 |
+| Toast | close button (coarse pointer) | 22x22 | 44x44 |
+
+320 / 390 / 430px regression run reports zero visible interactive targets below 44px on the audited shell surfaces and no horizontal overflow.
+
+### Additional observation (not fixed in this pass)
+
+The mobile Settings page reuses compact desktop form controls: selects and numeric inputs measure 28-40px, and the 关闭设置 icon button is 24x24. These are shared settings-surface controls and are tracked as a separate follow-up rather than part of the shell/task-center fix.
 
 ## Accessibility tree results
 
 - One named `navigation` landmark per shell (移动端工作台导航), with all four destinations named.
 - Zero unnamed controls on the audited surfaces (bookshelf/onboarding, More, Task Center, Settings).
 - No `<img>` without `alt`; headings are present for Command Palette and Task Center.
-- Task Center Escape returns to More, but focus returns to `body` instead of the More button (keyboard / screen-reader gap).
+- Opening the Task Center moves focus to its back control; Escape and the header back control both return focus to the More button (verified in the 2026-08-06 run).
 
 ## System notification flow
 
@@ -64,6 +71,5 @@ Surfaces below recommendation (all secondary or first-run):
 
 ## Findings for follow-up
 
-1. Small secondary touch targets listed above (recommend 44px minimum, 48px preferred).
-2. Focus not restored to the More button after Escape from Task Center.
-3. Real-device notch insets, real notification permission prompt, screen-reader reading order, and final pixel-level human review remain external checks.
+1. Mobile Settings page form controls (selects, numeric inputs, close icon) remain below the 44px recommendation.
+2. Real-device notch insets, real notification permission prompt, screen-reader reading order, and final pixel-level human review remain external checks.
