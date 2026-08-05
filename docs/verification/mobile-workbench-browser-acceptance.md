@@ -53,4 +53,4 @@
 - The acceptance ran against a fresh local workspace (`acceptance-book`) with no chapters, so it covers shell/navigation/layout rather than long-form editor content.
 - Pixel-level visual review was not possible in this session; layout invariants and interactions were verified programmatically via CDP.
 - A 404 for the missing book cover image was observed; it is expected for a book without a cover and is not a layout defect.
-- Safe-area insets and system-notification permission flows still require a real device or browser permission emulation and were not covered by this run.
+- Safe-area emulation, touch targets, AX-tree, and notification plumbing are covered by `docs/verification/mobile-workbench-automated-audit.md`; real-device insets and the OS permission prompt still need a device/browser check.
