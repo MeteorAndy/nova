@@ -3,11 +3,14 @@ import { Profiler } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { InteractiveLayout } from './InteractiveLayout'
 import { useInteractiveStore } from '../stores/interactive-store'
-import { createInteractiveStory, deleteInteractiveStory, getInteractiveBranches, getInteractiveSnapshot, getInteractiveStories, getInteractiveTellers, getStoryDirectors, selectInteractiveStory, updateInteractiveStory } from '../api'
+import { createInteractiveStory, deleteInteractiveStory, getInteractiveBranches, getInteractiveSnapshot, getInteractiveStories, getInteractiveTellers, getStoryDirectors, selectInteractiveStory, switchInteractiveBranch, updateInteractiveStory } from '../api'
 import type { Snapshot, StoryDirector, StorySummary, Teller } from '../types'
+import { consumeInteractiveStoryRecovery, requestInteractiveStoryRecovery } from '@/features/mobile-workbench/task-recovery-navigation'
+
+const responsiveState = vi.hoisted(() => ({ mobile: false }))
 
 vi.mock('@/hooks/useIsMobile', () => ({
-  useIsMobile: () => false,
+  useIsMobile: () => responsiveState.mobile,
 }))
 
 vi.mock('@/lib/api', () => ({
@@ -37,6 +40,10 @@ vi.mock('./DirectorPanel', () => ({
   DirectorPanel: () => <div data-testid="director-panel" />,
 }))
 
+vi.mock('./director-backstage/DirectorBackstage', () => ({
+  DirectorBackstage: () => <div data-testid="director-workspace" />,
+}))
+
 vi.mock('./SettingPanel', () => ({
   SettingPanel: () => <div data-testid="setting-panel" />,
 }))
@@ -49,12 +56,14 @@ vi.mock('./StoryStage', () => ({
   StoryStage: (props: {
     stories: StorySummary[]
     storyId: string
+    branchId: string
     onStoryCreate: (input: { title: string; origin?: string; story_teller_id: string; story_director_id?: string; choice_count: number; reply_target_chars?: number }) => Promise<void>
     onStoryDelete: (storyIds: string[]) => Promise<void>
     onStorySelect: (storyId: string) => void
     onDirectorChange: (directorId: string) => Promise<void>
+    onToggleDirectorPanel: () => void
   }) => (
-    <div data-testid="story-stage-probe" data-story-id={props.storyId}>
+    <div data-testid="story-stage-probe" data-story-id={props.storyId} data-branch-id={props.branchId}>
       <button
         type="button"
         onClick={() => void props.onStoryCreate({
@@ -83,12 +92,16 @@ vi.mock('./StoryStage', () => ({
       <button type="button" onClick={() => props.onStorySelect('st_2')}>
         mock select story
       </button>
+      <button type="button" onClick={props.onToggleDirectorPanel}>
+        mock open director workspace
+      </button>
       <div data-testid="story-list">{props.stories.map((item) => item.title).join('|')}</div>
     </div>
   ),
 }))
 
 beforeEach(() => {
+  responsiveState.mobile = false
   window.localStorage.clear()
   useInteractiveStore.setState({
     stories: [],
@@ -107,6 +120,7 @@ beforeEach(() => {
   vi.mocked(getInteractiveTellers).mockReset()
   vi.mocked(getStoryDirectors).mockReset()
   vi.mocked(selectInteractiveStory).mockReset()
+  vi.mocked(switchInteractiveBranch).mockReset()
   vi.mocked(getInteractiveSnapshot).mockReset()
   vi.mocked(getInteractiveBranches).mockReset()
   vi.mocked(updateInteractiveStory).mockReset()
@@ -114,8 +128,10 @@ beforeEach(() => {
   vi.mocked(getInteractiveTellers).mockResolvedValue([])
   vi.mocked(getStoryDirectors).mockResolvedValue([])
   vi.mocked(selectInteractiveStory).mockResolvedValue(undefined)
+  vi.mocked(switchInteractiveBranch).mockResolvedValue(undefined)
   vi.mocked(getInteractiveSnapshot).mockResolvedValue({ story_id: 'st_new', branch_id: 'main', turns: [], state: {} })
   vi.mocked(getInteractiveBranches).mockResolvedValue([{ id: 'main', head: '', title: '主线', created_at: '2026-07-04T00:00:00Z', current: true }])
+  consumeInteractiveStoryRecovery()
 })
 
 afterEach(() => {
@@ -289,6 +305,48 @@ describe('InteractiveLayout story selection', () => {
       expect(screen.getByTestId('story-stage-probe')).toHaveAttribute('data-story-id', 'st_2')
       expect(selectInteractiveStory).toHaveBeenCalledWith('st_2')
     })
+  })
+})
+
+describe('InteractiveLayout mobile workspaces', () => {
+  it('opens the director as a full workspace without an edge-swipe drawer host', async () => {
+    responsiveState.mobile = true
+    vi.mocked(getInteractiveStories).mockResolvedValue({
+      current_story_id: 'st_1',
+      stories: [story('st_1', '故事线')],
+    })
+
+    render(<InteractiveLayout workspace="/workspace" />)
+    await waitFor(() => expect(screen.getByTestId('story-stage-probe')).toHaveAttribute('data-story-id', 'st_1'))
+
+    expect(document.querySelector('[data-nova-mobile-pane-host="true"]')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'mock open director workspace' }))
+
+    expect(screen.getByTestId('director-workspace')).toBeInTheDocument()
+    expect(screen.queryByTestId('story-stage-probe')).not.toBeInTheDocument()
+  })
+
+  it('restores the source story and branch from a queued background task', async () => {
+    vi.mocked(getInteractiveStories).mockResolvedValue({
+      current_story_id: 'st_1',
+      stories: [story('st_1', '故事线 1'), story('st_2', '故事线 2')],
+    })
+    vi.mocked(getInteractiveSnapshot).mockImplementation(async (storyId, branchId) => ({
+      story_id: storyId,
+      branch_id: branchId || 'main',
+      turns: [],
+      state: {},
+    }))
+    requestInteractiveStoryRecovery({ storyId: 'st_2', branchId: 'night', taskId: 'task-story' })
+
+    render(<InteractiveLayout workspace="/workspace" />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('story-stage-probe')).toHaveAttribute('data-story-id', 'st_2')
+      expect(screen.getByTestId('story-stage-probe')).toHaveAttribute('data-branch-id', 'night')
+    })
+    expect(selectInteractiveStory).toHaveBeenCalledWith('st_2')
+    expect(switchInteractiveBranch).toHaveBeenCalledWith('st_2', 'night')
   })
 })
 

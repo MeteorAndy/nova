@@ -92,6 +92,52 @@ func (h *Handlers) HandleInteractiveSnapshot(ctx context.Context, c *app.Request
 	writeJSON(c, consts.StatusOK, snapshot)
 }
 
+func (h *Handlers) HandleInteractiveStateRevisionCreate(ctx context.Context, c *app.RequestContext) {
+	var body interactive.CreateStateRevisionRequest
+	if err := c.BindJSON(&body); err != nil {
+		writeErrorKey(c, consts.StatusBadRequest, "api.common.invalidRequestWithDetail", "detail", err.Error())
+		return
+	}
+	revision, err := h.app.CreateInteractiveStateRevision(c.Param("id"), body)
+	if err != nil {
+		writeInteractiveStateRevisionError(c, err)
+		return
+	}
+	writeJSON(c, consts.StatusOK, revision)
+}
+
+func (h *Handlers) HandleInteractiveStateRevisionUndo(ctx context.Context, c *app.RequestContext) {
+	h.handleInteractiveStateRevisionAction(c, interactive.StateRevisionActionUndo)
+}
+
+func (h *Handlers) HandleInteractiveStateRevisionRestore(ctx context.Context, c *app.RequestContext) {
+	h.handleInteractiveStateRevisionAction(c, interactive.StateRevisionActionRestore)
+}
+
+func (h *Handlers) handleInteractiveStateRevisionAction(c *app.RequestContext, action interactive.StateRevisionAction) {
+	var body interactive.StateRevisionActionRequest
+	if err := c.BindJSON(&body); err != nil {
+		writeErrorKey(c, consts.StatusBadRequest, "api.common.invalidRequestWithDetail", "detail", err.Error())
+		return
+	}
+	body.RevisionID = c.Param("revision_id")
+	body.Action = action
+	revision, err := h.app.ApplyInteractiveStateRevisionAction(c.Param("id"), body)
+	if err != nil {
+		writeInteractiveStateRevisionError(c, err)
+		return
+	}
+	writeJSON(c, consts.StatusOK, revision)
+}
+
+func writeInteractiveStateRevisionError(c *app.RequestContext, err error) {
+	status := consts.StatusBadRequest
+	if errors.Is(err, interactive.ErrStateRevisionConflict) {
+		status = consts.StatusConflict
+	}
+	writeError(c, status, err.Error())
+}
+
 func (h *Handlers) HandleInteractiveRuleResolutionReroll(ctx context.Context, c *app.RequestContext) {
 	var body interactive.RuleResolutionRerollRequest
 	if err := c.BindJSON(&body); err != nil && len(c.Request.Body()) > 0 {
@@ -446,10 +492,13 @@ func (h *Handlers) HandleInteractiveContextCompactionRemove(ctx context.Context,
 }
 
 func (h *Handlers) HandleInteractiveChatAbort(ctx context.Context, c *app.RequestContext) {
-	if task := h.app.ActiveInteractiveTask(); task != nil {
+	storyID := strings.TrimSpace(c.Query("story_id"))
+	branchID := strings.TrimSpace(c.Query("branch"))
+	task, _ := h.app.ActiveInteractiveTaskFor(storyID, branchID)
+	if task != nil {
 		log.Printf("[interactive-agent-sse] abort requested task_id=%s status=%s", task.ID(), task.Status())
+		task.Abort()
 	}
-	h.app.AbortInteractiveTask()
 	c.JSON(consts.StatusOK, map[string]string{"status": "ok"})
 }
 

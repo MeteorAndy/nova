@@ -1,10 +1,14 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import i18n from '@/i18n'
 import { server } from '@/test/msw/server'
 import { AutomationsView } from './AutomationsView'
+
+// This suite uses deferred MSW gates and real user-event timing; under the full
+// parallel run it needs more than the default 5s per test.
+vi.setConfig({ testTimeout: 20_000 })
 
 const taskBase = {
   enabled: true,
@@ -517,7 +521,7 @@ describe('AutomationsView', () => {
       archiveGate.resolve()
       await act(async () => { await i18n.changeLanguage(previousLanguage) })
     }
-  })
+  }, 15_000)
 })
 
 function deferred<T>() {

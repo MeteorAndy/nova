@@ -1,6 +1,6 @@
 import { fetchAPI, jsonHeaders, parseSSEStream, requestJSON } from '@/lib/api-client'
 import type { ContextAnalysis, InteractiveImage } from '@/lib/api-client'
-import type { ActorStateModule, ActorTraitRollRequest, ActorTraitRollResult, BranchSummary, DirectorPlan, DirectorPlanStatus, EventPackageModule, ImagePreset, InitialActorTraitRoll, InteractiveSSEEvent, RuleResolution, RuleResolutionRerollInput, RuleSystemModule, Snapshot, StoryDirector, StoryDirectorModuleRefs, StoryDirectorRunPolicy, StoryStateSchemaPolicy, StyleReference, StyleReferenceFileDocument, StoryImageSettings, StoryIndex, StoryOpeningConfig, StorySummary, Teller, UpdateDirectorPlanInput, UpdateTurnNarrativeResult } from './types'
+import type { ActorStateModule, ActorStateOp, ActorTraitRollRequest, ActorTraitRollResult, BranchSummary, DirectorPlan, DirectorPlanStatus, EventPackageModule, ImagePreset, InitialActorTraitRoll, InteractiveSSEEvent, RuleResolution, RuleResolutionRerollInput, RuleSystemModule, Snapshot, StateOp, StateRevisionEvent, StoryDirector, StoryDirectorModuleRefs, StoryDirectorRunPolicy, StoryStateSchemaPolicy, StyleReference, StyleReferenceFileDocument, StoryImageSettings, StoryIndex, StoryOpeningConfig, StorySummary, Teller, UpdateDirectorPlanInput, UpdateTurnNarrativeResult } from './types'
 
 function presetMutationBody<T extends object>(input: T, baseRevision?: string, workspace?: string) {
   return {
@@ -415,6 +415,37 @@ export async function removeInteractiveContextCompaction(storyId: string, branch
   return Boolean(data.removed)
 }
 
-export async function abortInteractiveChat(): Promise<void> {
-  await requestJSON('/api/interactive/chat/abort', { method: 'POST' })
+export async function abortInteractiveChat(storyId: string, branchId: string): Promise<void> {
+  await requestJSON(`/api/interactive/chat/abort?${interactiveChatQuery(storyId, branchId)}`, { method: 'POST' })
+}
+
+export function createInteractiveStateRevision(storyId: string, input: {
+  branch_id: string
+  expected_head_id: string
+  base_turn_id: string
+  source: string
+  ops: StateOp[]
+  actor_ops: ActorStateOp[]
+}): Promise<StateRevisionEvent> {
+  return requestJSON(`/api/interactive/stories/${encodeURIComponent(storyId)}/state-revisions`, {
+    method: 'POST',
+    headers: jsonHeaders,
+    body: JSON.stringify(input),
+  })
+}
+
+export function undoInteractiveStateRevision(storyId: string, revisionId: string, input: { branch_id: string; expected_head_id: string; source: string }): Promise<StateRevisionEvent> {
+  return requestJSON(`/api/interactive/stories/${encodeURIComponent(storyId)}/state-revisions/${encodeURIComponent(revisionId)}/undo`, {
+    method: 'POST',
+    headers: jsonHeaders,
+    body: JSON.stringify(input),
+  })
+}
+
+export function restoreInteractiveStateRevision(storyId: string, revisionId: string, input: { branch_id: string; expected_head_id: string; source: string }): Promise<StateRevisionEvent> {
+  return requestJSON(`/api/interactive/stories/${encodeURIComponent(storyId)}/state-revisions/${encodeURIComponent(revisionId)}/restore`, {
+    method: 'POST',
+    headers: jsonHeaders,
+    body: JSON.stringify(input),
+  })
 }

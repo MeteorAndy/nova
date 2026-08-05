@@ -1,4 +1,10 @@
 const chat = {
+  'chat.handoff.listLabel': '待发送的上下文交接',
+  'chat.handoff.source.editorSelection': '编辑器选区',
+  'chat.handoff.purpose.askAgent': '询问 Agent',
+  'chat.handoff.versionUnknown': '未记录版本',
+  'chat.handoff.sizeBytes': '{{bytes}} bytes',
+  'chat.handoff.remove': '移除上下文交接：{{source}}',
   'chat.agent': '创作Agent',
   'chat.panelSwitch': 'Agent 面板切换',
   'chat.view.chat': '对话',
@@ -135,6 +141,7 @@ const chat = {
   'chat.tracePanel.truncation': '截断',
   'chat.action.editTurn': '编辑这轮输入',
   'chat.action.editAssistantReply': '编辑 AI 回复',
+  'chat.action.createBranchFromTurn': '从此回合创建剧情线',
   'chat.action.copyMessage': '复制消息',
   'chat.action.copyMessageDone': '已复制',
   'chat.action.prevVersion': '切换到上一版',
