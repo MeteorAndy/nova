@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
-	"time"
 
 	"denova/internal/automation"
 	"denova/internal/taskcenter"
@@ -88,39 +86,13 @@ func (a *App) Tasks() (taskcenter.ListResult, error) {
 			result.ActionRequiredCount++
 		}
 	}
-	a.mu.RLock()
-	lastImportExportTask := a.lastImportExportTask
-	activeNovelImportTask := a.activeNovelImportTask
-	activeNovelImportTitle := a.activeNovelImportTitle
-	a.mu.RUnlock()
-	if activeNovelImportTask != nil && !activeNovelImportTask.Finished() {
-		snapshot := activeNovelImportTask.Snapshot()
-		if status, statusErr := agentTaskStatus(snapshot.Status); statusErr == nil {
-			workspace := a.Workspace()
-			task := taskcenter.Task{
-				ID:        "import-export:" + snapshot.ID,
-				Type:      taskcenter.TaskTypeImportExport,
-				Status:    status,
-				Title:     activeNovelImportTitle,
-				Project:   taskProjectRef(workspace, projectNames),
-				StartedAt: snapshot.StartedAt,
-				UpdatedAt: snapshot.UpdatedAt,
-				Recovery: taskcenter.RecoveryTarget{
-					Kind:      taskcenter.RecoveryImportExport,
-					Workspace: workspace,
-					TaskID:    snapshot.ID,
-				},
-				Error: snapshot.Error,
-			}
-			result.Tasks = append(result.Tasks, task)
-			if taskcenter.IsActionRequired(task.Status) {
-				result.ActionRequiredCount++
-			}
+	for _, run := range a.novelImportTasksSnapshot() {
+		task, taskErr := novelImportTaskCenterTask(run, projectNames)
+		if taskErr != nil {
+			return taskcenter.ListResult{}, taskErr
 		}
-	}
-	if lastImportExportTask != nil {
-		result.Tasks = append(result.Tasks, *lastImportExportTask)
-		if taskcenter.IsActionRequired(lastImportExportTask.Status) {
+		result.Tasks = append(result.Tasks, task)
+		if taskcenter.IsActionRequired(task.Status) {
 			result.ActionRequiredCount++
 		}
 	}
@@ -133,35 +105,39 @@ func (a *App) Tasks() (taskcenter.ListResult, error) {
 	return result, nil
 }
 
-// RecordNovelImportResult keeps the latest novel import visible in the task
-// center as an import/export task with a recovery target for the new book.
-func (a *App) RecordNovelImportResult(workspace, title string, err error) {
-	now := time.Now()
-	status := taskcenter.StatusCompleted
-	var message string
+func novelImportTaskCenterTask(run novelImportTaskSnapshot, projectNames map[string]string) (taskcenter.Task, error) {
+	snapshot := run.task
+	status, err := agentTaskStatus(snapshot.Status)
 	if err != nil {
-		status = taskcenter.StatusFailed
-		message = err.Error()
+		return taskcenter.Task{}, fmt.Errorf("novel import task %s: %w", snapshot.ID, err)
 	}
-	workspace = canonicalTaskWorkspace(workspace)
-	project := taskProjectRef(workspace, nil)
-	record := taskcenter.Task{
-		ID:        "import-export:" + strconv.FormatInt(now.UnixNano(), 10),
+	workspace := run.sourceWorkspace
+	title := run.title
+	message := snapshot.Error
+	if run.result != nil {
+		if run.result.workspace != "" {
+			workspace = run.result.workspace
+		}
+		title = run.result.title
+		if status == taskcenter.StatusFailed {
+			message = run.result.error
+		}
+	}
+	return taskcenter.Task{
+		ID:        "import-export:" + snapshot.ID,
 		Type:      taskcenter.TaskTypeImportExport,
 		Status:    status,
 		Title:     title,
-		Project:   project,
-		StartedAt: now,
-		UpdatedAt: now,
+		Project:   taskProjectRef(workspace, projectNames),
+		StartedAt: snapshot.StartedAt,
+		UpdatedAt: snapshot.UpdatedAt,
 		Recovery: taskcenter.RecoveryTarget{
 			Kind:      taskcenter.RecoveryImportExport,
 			Workspace: workspace,
+			TaskID:    snapshot.ID,
 		},
 		Error: message,
-	}
-	a.mu.Lock()
-	a.lastImportExportTask = &record
-	a.mu.Unlock()
+	}, nil
 }
 
 func loreImageGenerationTask(task *Task, projectNames map[string]string, workspace string) (taskcenter.Task, error) {

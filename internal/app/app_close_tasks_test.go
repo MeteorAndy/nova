@@ -8,14 +8,17 @@ import (
 	"denova/internal/agent"
 )
 
-func TestAppCloseStopsAgentAndInteractiveRuns(t *testing.T) {
+func TestAppCloseStopsRegisteredBackgroundTasks(t *testing.T) {
 	agentStarted := make(chan struct{})
 	interactiveStarted := make(chan struct{})
+	novelImportStarted := make(chan struct{})
 	agentTask := blockingLifecycleTask(agentStarted)
 	interactiveTask := blockingLifecycleTask(interactiveStarted)
+	novelImportTask := blockingLifecycleTask(novelImportStarted)
 	t.Cleanup(func() {
 		agentTask.Abort()
 		interactiveTask.Abort()
+		novelImportTask.Abort()
 	})
 
 	application := &App{
@@ -26,9 +29,13 @@ func TestAppCloseStopsAgentAndInteractiveRuns(t *testing.T) {
 		interactiveTaskRuns: map[string]*interactiveTaskRun{
 			"story": {task: interactiveTask},
 		},
+		novelImportTasks: map[string]*novelImportTaskState{
+			"novel": {task: novelImportTask},
+		},
 	}
 	<-agentStarted
 	<-interactiveStarted
+	<-novelImportStarted
 
 	application.Close()
 
@@ -37,6 +44,9 @@ func TestAppCloseStopsAgentAndInteractiveRuns(t *testing.T) {
 	}
 	if interactiveTask.Status() != TaskAborted || !interactiveTask.Finished() {
 		t.Fatalf("interactive task remained active after App.Close: status=%s finished=%t", interactiveTask.Status(), interactiveTask.Finished())
+	}
+	if novelImportTask.Status() != TaskAborted || !novelImportTask.Finished() {
+		t.Fatalf("novel import task remained active after App.Close: status=%s finished=%t", novelImportTask.Status(), novelImportTask.Finished())
 	}
 }
 

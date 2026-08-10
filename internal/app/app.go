@@ -14,7 +14,6 @@ import (
 	"denova/internal/book"
 	"denova/internal/interactive"
 	"denova/internal/session"
-	"denova/internal/taskcenter"
 )
 
 // App 是 API 层使用的应用门面；具体业务由领域应用服务承接。
@@ -36,9 +35,7 @@ type App struct {
 	agentTaskRuns          map[string]*agentTaskRun
 	interactiveTaskRuns    map[string]*interactiveTaskRun
 	activeLoreImageTask    *Task
-	activeNovelImportTask  *Task
-	activeNovelImportTitle string
-	lastImportExportTask   *taskcenter.Task
+	novelImportTasks       map[string]*novelImportTaskState
 	activeAutomationTasks  map[string]*Task
 	activeAutomationRuns   map[string]automationRunState
 	activeAutomationClaims map[string]*automationRunClaim
@@ -244,7 +241,7 @@ func (a *App) Close() {
 
 func (a *App) stopBackgroundTasks() {
 	a.mu.RLock()
-	tasks := make(map[*Task]struct{}, len(a.agentTaskRuns)+len(a.interactiveTaskRuns)+len(a.activeAutomationTasks)+1)
+	tasks := make(map[*Task]struct{}, len(a.agentTaskRuns)+len(a.interactiveTaskRuns)+len(a.novelImportTasks)+len(a.activeAutomationTasks)+1)
 	for _, run := range a.agentTaskRuns {
 		if run != nil && run.task != nil {
 			tasks[run.task] = struct{}{}
@@ -258,6 +255,11 @@ func (a *App) stopBackgroundTasks() {
 	for _, task := range a.activeAutomationTasks {
 		if task != nil {
 			tasks[task] = struct{}{}
+		}
+	}
+	for _, run := range a.novelImportTasks {
+		if run != nil && run.task != nil {
+			tasks[run.task] = struct{}{}
 		}
 	}
 	if a.activeLoreImageTask != nil {

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"denova/internal/agent"
@@ -20,8 +21,28 @@ type NovelImportTaskRequest struct {
 	Options     book.NovelImportOptions
 }
 
+type novelImportTaskResult struct {
+	workspace string
+	title     string
+	error     string
+}
+
+type novelImportTaskState struct {
+	task            *Task
+	title           string
+	sourceWorkspace string
+	result          *novelImportTaskResult
+}
+
+type novelImportTaskSnapshot struct {
+	task            TaskSnapshot
+	title           string
+	sourceWorkspace string
+	result          *novelImportTaskResult
+}
+
 // StartNovelImportTask runs a confirmed novel import in the recoverable task
-// pipeline and keeps the latest result visible in the task center.
+// pipeline and keeps every execution visible in the task center.
 func (a *App) StartNovelImportTask(ctx context.Context, req NovelImportTaskRequest) (*Task, error) {
 	layered, err := a.Settings()
 	if err != nil {
@@ -32,12 +53,17 @@ func (a *App) StartNovelImportTask(ctx context.Context, req NovelImportTaskReque
 	}
 	novaDir := layered.Paths.DenovaDir
 	title := strings.TrimSpace(req.Title)
+	start := make(chan struct{})
 	task := NewTask(func(ctx context.Context, task *Task, emit func(agent.Event)) {
-		defer a.clearActiveNovelImportTask(task)
+		select {
+		case <-start:
+		case <-ctx.Done():
+			return
+		}
 		emit(agent.Event{Type: "progress", Data: novelImportTaskProgress{Step: "uploaded"}})
 		preview, err := book.PreviewNovelImport(req.Filename, req.Data, req.Options)
 		if err != nil {
-			a.RecordNovelImportResult("", req.Filename, err)
+			a.recordNovelImportResult(task, "", req.Filename, err)
 			emit(agent.Event{Type: "error", Data: novelImportTaskError{Error: err.Error()}})
 			return
 		}
@@ -47,18 +73,18 @@ func (a *App) StartNovelImportTask(ctx context.Context, req NovelImportTaskReque
 		emit(agent.Event{Type: "progress", Data: novelImportTaskProgress{Step: "create_book"}})
 		workspace, meta, err := a.CreateBook(ctx, novaDir, title, req.Author, req.Description)
 		if err != nil {
-			a.RecordNovelImportResult("", title, err)
+			a.recordNovelImportResult(task, "", title, err)
 			emit(agent.Event{Type: "error", Data: novelImportTaskError{Error: err.Error()}})
 			return
 		}
 		emit(agent.Event{Type: "progress", Data: novelImportTaskProgress{Step: "importing"}})
 		importPreview, paths, err := book.ImportNovelToWorkspace(workspace, req.Filename, req.Data, req.Options)
 		if err != nil {
-			a.RecordNovelImportResult(workspace, title, err)
+			a.recordNovelImportResult(task, workspace, title, err)
 			emit(agent.Event{Type: "error", Data: novelImportTaskError{Error: err.Error()}})
 			return
 		}
-		a.RecordNovelImportResult(workspace, title, nil)
+		a.recordNovelImportResult(task, workspace, title, nil)
 		emit(agent.Event{Type: "done", Data: book.NovelImportResult{
 			Workspace:    workspace,
 			BookMeta:     &meta,
@@ -69,19 +95,79 @@ func (a *App) StartNovelImportTask(ctx context.Context, req NovelImportTaskReque
 		}})
 	})
 	a.mu.Lock()
-	a.activeNovelImportTask = task
-	a.activeNovelImportTitle = req.Filename
+	if a.novelImportTasks == nil {
+		a.novelImportTasks = make(map[string]*novelImportTaskState)
+	}
+	a.novelImportTasks[task.ID()] = &novelImportTaskState{
+		task:            task,
+		title:           req.Filename,
+		sourceWorkspace: a.workspace,
+	}
 	a.mu.Unlock()
+	close(start)
 	return task, nil
 }
 
-func (a *App) clearActiveNovelImportTask(task *Task) {
-	a.mu.Lock()
-	if a.activeNovelImportTask == task {
-		a.activeNovelImportTask = nil
-		a.activeNovelImportTitle = ""
+func (a *App) recordNovelImportResult(task *Task, workspace, title string, err error) {
+	result := &novelImportTaskResult{
+		workspace: canonicalTaskWorkspace(workspace),
+		title:     title,
 	}
+	status := "completed"
+	if err != nil {
+		result.error = err.Error()
+		status = "failed"
+	}
+	a.mu.Lock()
+	if a.novelImportTasks == nil {
+		a.novelImportTasks = make(map[string]*novelImportTaskState)
+	}
+	state := a.novelImportTasks[task.ID()]
+	if state == nil {
+		state = &novelImportTaskState{task: task}
+		a.novelImportTasks[task.ID()] = state
+	}
+	state.result = result
 	a.mu.Unlock()
+	log.Printf("[novel-import] task result recorded task_id=%s status=%s workspace=%q title=%q error=%q", task.ID(), status, result.workspace, result.title, result.error)
+}
+
+func (a *App) novelImportTasksSnapshot() []novelImportTaskSnapshot {
+	a.mu.RLock()
+	tasks := make([]*Task, 0, len(a.novelImportTasks))
+	for _, state := range a.novelImportTasks {
+		if state == nil || state.task == nil {
+			continue
+		}
+		tasks = append(tasks, state.task)
+	}
+	a.mu.RUnlock()
+
+	runs := make([]novelImportTaskSnapshot, 0, len(tasks))
+	for _, task := range tasks {
+		// Result metadata is recorded before a normal terminal Task state. Reading
+		// the Task first prevents one catalog response from combining that terminal
+		// state with metadata copied before the result was recorded.
+		taskSnapshot := task.Snapshot()
+		a.mu.RLock()
+		state := a.novelImportTasks[taskSnapshot.ID]
+		if state == nil || state.task != task {
+			a.mu.RUnlock()
+			continue
+		}
+		copied := novelImportTaskSnapshot{
+			task:            taskSnapshot,
+			title:           state.title,
+			sourceWorkspace: state.sourceWorkspace,
+		}
+		if state.result != nil {
+			result := *state.result
+			copied.result = &result
+		}
+		a.mu.RUnlock()
+		runs = append(runs, copied)
+	}
+	return runs
 }
 
 type novelImportTaskProgress struct {

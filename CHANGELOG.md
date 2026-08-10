@@ -53,6 +53,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - 完成移动工作台浏览器验收：320–1280px 七档宽度在中文/英文、深色/浅色下均无横向溢出，四入口导航正确，任务中心 Esc 返回路径与 200% 缩放通过。
 - Mobile Workbench browser acceptance completed: 320–1280px in zh/en and dark/light show no horizontal overflow, the four-destination navigation is correct, and the Task Center Escape back path plus 200% zoom pass.
 
+### Fixed
+
+- 任务中心现在为每次小说导入保留稳定且独立的任务记录：完成前后复用同一执行 ID 和恢复 ID，连续导入不再覆盖较早任务，失败导入保留来源项目，应用关闭时会停止仍在运行的导入。
+- The Task Center now keeps a stable, independent record for every novel import: running and completed states share the same execution and recovery IDs, consecutive imports no longer replace earlier tasks, failed imports retain their source project, and app shutdown stops imports still in progress.
+
 ### Changed
 
 - 移动端统一任务中心：Agent 运行、互动故事与自动化等长时间操作集中为可恢复任务，任务中心可从“更多”打开，顶部返回键与浏览器返回走同一路径。
