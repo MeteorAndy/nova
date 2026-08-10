@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 应用级集成测试覆盖断线时的项目切换保护：无未保存草稿时切换请求失败并显示“切换书籍失败”，有未保存草稿时先保存失败并阻止切换请求。
+- Added app-level integration tests for the offline project-switch gate: with no dirty draft, the switch request fails with the localized switch error; with a dirty draft, the save fails first and the switch request is never sent.
 - 项目切换前保存保护补全应用级集成测试：编辑器草稿保存失败时会停留在当前创作项目并显示明确错误，移动端项目切换器与书架管理两条路径均覆盖。
 - Added app-level integration coverage for the save-before-project-switch guard: when the editor draft fails to save, the app stays in the current project and shows a clear error, covering both the mobile project switcher and the bookshelf management path.
 - Mobile Workbench v2 替换旧移动布局：写作模式使用“正文、项目、Agent、更多”，游戏模式使用“故事、剧情线、资料、更多”；任意时刻只有一个一级入口高亮，模式切换只出现在“更多”中，写作与游戏分别恢复自己的工作状态。

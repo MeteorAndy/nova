@@ -27,7 +27,11 @@ function renderApp() {
   )
 }
 
-function workspaceHandlers(saveRequests: unknown[], switchRequests: unknown[]) {
+function workspaceHandlers(
+  saveRequests: unknown[],
+  switchRequests: unknown[],
+  options: { offlineSave?: boolean; offlineSwitch?: boolean } = {},
+) {
   return [
     http.get('/api/workspace/current', () =>
       HttpResponse.json({ workspace: WORKSPACE_ONE, has_state: true }),
@@ -75,13 +79,13 @@ function workspaceHandlers(saveRequests: unknown[], switchRequests: unknown[]) {
       })
     }),
     http.post('/api/workspace/file', async ({ request }) => {
-      const body = await request.json()
-      saveRequests.push(body)
+      saveRequests.push(await request.json())
+      if (options.offlineSave) return HttpResponse.error()
       return HttpResponse.json({ error: '磁盘写入失败' }, { status: 500 })
     }),
     http.post('/api/workspace/switch', async ({ request }) => {
-      const body = await request.json()
-      switchRequests.push(body)
+      switchRequests.push(await request.json())
+      if (options.offlineSwitch) return HttpResponse.error()
       return HttpResponse.json({ workspace: WORKSPACE_TWO, message: 'ok' })
     }),
     http.get('/api/tasks', () =>
@@ -197,6 +201,53 @@ describe('应用级项目切换保存保护', () => {
     expect(await screen.findAllByText('保存失败')).not.toHaveLength(0)
     await waitFor(() => expect(saveRequests.length).toBeGreaterThan(0))
     expect(switchRequests).toHaveLength(0)
+    expect(screen.getByRole('button', { name: '切换书籍，当前：创作项目一' })).toBeInTheDocument()
+  })
+
+  it('断线且无未保存草稿时，切换项目失败并留在当前项目显示明确错误', async () => {
+    const user = userEvent.setup()
+    const saveRequests: unknown[] = []
+    const switchRequests: unknown[] = []
+    server.use(...workspaceHandlers(saveRequests, switchRequests, { offlineSwitch: true }))
+
+    renderApp()
+
+    const switcher = await screen.findByRole('button', { name: '切换书籍，当前：创作项目一' })
+    await user.click(switcher)
+    await user.click(await screen.findByRole('menuitem', { name: /创作项目二/ }))
+
+    expect(await screen.findAllByText('切换书籍失败')).not.toHaveLength(0)
+    await waitFor(() => expect(switchRequests).toHaveLength(1))
+    expect(saveRequests).toHaveLength(0)
+
+    await user.keyboard('{Escape}')
+    expect(screen.getByRole('button', { name: '切换书籍，当前：创作项目一' })).toBeInTheDocument()
+  })
+
+  it('断线且存在未保存草稿时，保存失败会阻止项目切换请求', async () => {
+    const user = userEvent.setup()
+    const saveRequests: unknown[] = []
+    const switchRequests: unknown[] = []
+    server.use(...workspaceHandlers(saveRequests, switchRequests, { offlineSave: true }))
+
+    renderApp()
+
+    const switcher = await screen.findByRole('button', { name: '切换书籍，当前：创作项目一' })
+    const editor = await waitFor(() => document.querySelector('.ProseMirror'))
+    expect(editor).not.toBeNull()
+
+    await user.click(editor!)
+    await user.keyboard('修改')
+    await waitFor(() => expect(editor!.textContent).toContain('修改'))
+
+    await user.click(switcher)
+    await user.click(await screen.findByRole('menuitem', { name: /创作项目二/ }))
+
+    expect(await screen.findAllByText('保存失败')).not.toHaveLength(0)
+    await waitFor(() => expect(saveRequests.length).toBeGreaterThan(0))
+    expect(switchRequests).toHaveLength(0)
+
+    await user.keyboard('{Escape}')
     expect(screen.getByRole('button', { name: '切换书籍，当前：创作项目一' })).toBeInTheDocument()
   })
 })
