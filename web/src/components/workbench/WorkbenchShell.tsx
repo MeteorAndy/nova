@@ -191,6 +191,7 @@ export function WorkbenchShell({
         setTaskActivity({ result, loadState: 'ready' })
         for (const task of result.tasks) {
           if (task.status !== 'waiting_user' && task.status !== 'failed') continue
+          if (!systemNotificationsEnabled) continue
           if (notifiedTaskIDsRef.current.has(task.id)) continue
           notifiedTaskIDsRef.current.add(task.id)
           void maybeNotifyActionableTask({
@@ -219,7 +220,7 @@ export function WorkbenchShell({
       clearTimer()
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [])
+  }, [systemNotificationsEnabled, t])
 
   const automationInboxUnread = taskActivity.result.tasks.filter((task) => task.type === 'automation' && task.status === 'waiting_user').length
   const automationRunning = taskActivity.result.tasks.filter((task) => task.type === 'automation' && task.status === 'running').length

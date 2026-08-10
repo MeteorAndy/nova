@@ -1,7 +1,7 @@
 # Mobile Workbench v2 Automated Audit
 
-> Date: 2026-08-05 (initial run), 2026-08-06 (post-fix regression run)
-> Method: headless Chrome (CDP) against the local dev stack (Vite + Denova backend), driven by a temporary Node CDP script under `Z:\nova\.scratch-mobile-audit\` (removed after the run). The script emulated mobile viewports and touch input, overrode CSS safe-area insets through `Emulation.setSafeAreaInsetsOverride`, dumped the AX tree, measured interactive element hit areas, and drove the More / Task Center / Escape flow. Navigation clicks use DOM clicks so transient toasts cannot block the flow; Escape is dispatched as a real key event.
+> Date: 2026-08-05 (initial run), 2026-08-06 and 2026-08-11 (post-fix regression runs)
+> Method: headless Chrome (CDP) against the local dev stack (Vite + Denova backend), driven by temporary Node CDP scripts under `Z:\nova\.scratch-mobile-audit\` and `Z:\nova\.scratch-mobile-settings-audit\` (removed after each run). The scripts emulated mobile viewports and touch input, overrode CSS safe-area insets through `Emulation.setSafeAreaInsetsOverride`, dumped the AX tree, measured interactive element hit areas, and drove key mobile flows. Navigation clicks use DOM clicks so transient toasts cannot block the flow; Escape is dispatched as a real key event.
 
 ## Layout results
 
@@ -45,11 +45,13 @@ Measured after the 2026-08-06 fix (390px dark):
 | First-run card | close button | 24x24 | 44x44 |
 | Toast | close button (coarse pointer) | 22x22 | 44x44 |
 
-320 / 390 / 430px regression run reports zero visible interactive targets below 44px on the audited shell surfaces and no horizontal overflow.
+320 / 390 / 430px regression runs report zero visible interactive targets below 44px on the audited shell surfaces and no horizontal overflow.
 
-### Additional observation (not fixed in this pass)
+### Settings touch-target regression (2026-08-11)
 
-The mobile Settings page reuses compact desktop form controls: selects and numeric inputs measure 28-40px, and the 关闭设置 icon button is 24x24. These are shared settings-surface controls and are tracked as a separate follow-up rather than part of the shell/task-center fix.
+The mobile Settings page initially exposed 66 visible controls at 320x844; 64 were below the 44px recommendation. The close action measured 24x24, the pane trigger 40x40, native fields 34-36px high, shadcn inputs 32px, and compact Radix select triggers 28-40px.
+
+After the fix, the same CDP audit reported zero failures at 320, 390, and 430px with coarse-pointer emulation and no horizontal overflow. The 320px English/light run also reported zero failures. Expanded Radix context-window options each measured 44px high. Fine-pointer desktop Settings retains its compact density.
 
 ## Accessibility tree results
 
@@ -71,5 +73,4 @@ The mobile Settings page reuses compact desktop form controls: selects and numer
 
 ## Findings for follow-up
 
-1. Mobile Settings page form controls (selects, numeric inputs, close icon) remain below the 44px recommendation.
-2. Real-device notch insets, real notification permission prompt, screen-reader reading order, and final pixel-level human review remain external checks.
+1. Real-device notch insets, real notification permission prompt, screen-reader reading order, and final pixel-level human review remain external checks.

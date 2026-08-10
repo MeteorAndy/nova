@@ -1,6 +1,6 @@
 # Fork Issue #1 Coverage Matrix
 
-> Date: 2026-08-04
+> Date: 2026-08-11
 > Scope: the 104 user stories in [mobile-workbench-v2-spec](../specs/mobile-workbench-v2-spec.md).
 > Status legend: ✅ verified by automated tests and/or browser acceptance; 🟡 implemented with partial or device-dependent verification; ⬜ not implemented (either out of scope by design or still missing).
 
@@ -67,8 +67,8 @@
 | 52 | Badge counts waiting/failed only | ✅ | WorkbenchShell badge tests |
 | 53 | Completion never steals focus | ✅ | task center design + polling tests |
 | 54 | In-app task center always available | ✅ | More menu + integration tests |
-| 55 | Notifications off by default, no first-run request | ✅ | settings default + module tests |
-| 56 | Notifications show type/project only | ✅ | task-notifications tests |
+| 55 | Notifications off by default, no first-run request | ✅ | settings default + module tests + live-preference workbench integration test |
+| 56 | Notifications show type/project only | ✅ | task-notifications tests + locale/privacy workbench integration test |
 
 ## Interactive Story (57-81)
 
@@ -120,7 +120,7 @@
 | 95 | Tablet two-pane when space allows | 🟡 | tier layout present; two-pane not browser-asserted |
 | 96 | Desktop keeps multi-pane + tabs | ✅ | desktop workbench retained; responsive tests |
 | 97 | Rotation keeps editor/session mounted | ✅ | adaptive-surface + stable host tests |
-| 98 | Coarse pointer keeps touch targets | 🟡 | min-h-12/44px targets in shell; not measured |
+| 98 | Coarse pointer keeps touch targets | ✅ | CDP measurement covers shell, task center, onboarding, toast, Settings controls, and Radix options at 320/390/430px |
 | 99 | Complete Simplified Chinese copy | ✅ | i18n alignment + zh browser run |
 | 100 | English long-text no truncation/overlap | ✅ | long-English book name browser case (320/390/430) |
 | 101 | Screen-reader semantics | 🟡 | aria labels present; SR audit not run |
@@ -130,6 +130,6 @@
 
 ## Remaining gaps
 
-- Device-only verification: safe-area insets, real system-notification permission flow, coarse-pointer measurement on hardware.
-- Human/vision review of rendered pixels (this session's browser run is programmatic; no image review capability).
+- Device-only verification: safe-area insets and the real system-notification permission flow on hardware.
+- Human/vision review remains incomplete across all surfaces; Settings was visually inspected at 320px in zh-CN/dark and en-US/light.
 - Explicit tests for a few 🟡 rows (long-title truncation, project-switch save failure, mobile two-pane at wide tablet, screen-reader pass).
