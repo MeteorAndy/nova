@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 项目切换前保存保护补全应用级集成测试：编辑器草稿保存失败时会停留在当前创作项目并显示明确错误，移动端项目切换器与书架管理两条路径均覆盖。
+- Added app-level integration coverage for the save-before-project-switch guard: when the editor draft fails to save, the app stays in the current project and shows a clear error, covering both the mobile project switcher and the bookshelf management path.
 - Mobile Workbench v2 替换旧移动布局：写作模式使用“正文、项目、Agent、更多”，游戏模式使用“故事、剧情线、资料、更多”；任意时刻只有一个一级入口高亮，模式切换只出现在“更多”中，写作与游戏分别恢复自己的工作状态。
 - Mobile Workbench v2 replaces the legacy mobile layout: Writing uses Manuscript / Project / Agent / More, and Game uses Story / Timeline / Lore / More; exactly one primary destination stays highlighted, mode switching lives only under More, and each mode restores its own workspace state.
 - Agent 上下文交接：发送前在输入区显示来源、用途、版本和 UTF-8 大小，并支持移除；后端按实际内容重新计算字节数，不信任客户端上报，并拒绝超过上限的交接。

@@ -17,8 +17,8 @@
 | 7 | Per-mode state restoration | ✅ | MobileWorkbench.integration.test.tsx restore test |
 | 8 | Shared menus never switch mode | ✅ | integration test "shared workspaces ... without changing mode" |
 | 9 | Project and mode switches are independent | ✅ | integration tests |
-| 10 | Save before project switch | 🟡 | flushEditorDraft wired in App; explicit failure-path test not found |
-| 11 | Save failure stays and shows error | 🟡 | editor error status tests exist; recovery switch-failure abort is asserted, editor save-failure toast path remains partial |
+| 10 | Save before project switch | ✅ | App.save-before-project-switch.integration.test.tsx covers mobile switcher and bookshelf paths (save POST precedes switch) |
+| 11 | Save failure stays and shows error | ✅ | App.save-before-project-switch.integration.test.tsx asserts zh error toast, zero switch requests, current project unchanged |
 | 12 | Top bar shows current work object | ✅ | shell header + browser acceptance heading |
 | 13 | Project subtitle opens switcher | ✅ | BookSwitcher + header tests |
 | 14 | Long titles never cover controls | ✅ | MobileWorkbench.integration.test.tsx long-name case |
