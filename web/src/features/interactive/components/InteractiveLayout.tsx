@@ -14,6 +14,7 @@ import { DirectorPanel } from './DirectorPanel'
 import { SettingPanel, type SettingPanelMode } from './SettingPanel'
 import { StoryPicker } from './StoryPicker'
 import { StoryStage } from './StoryStage'
+import { StorylinesView } from './StorylinesView'
 import {
   readStoryStateDisplayPreference,
   writeStoryStateDisplayPreference,
@@ -384,6 +385,11 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
     await reloadStories()
   }
 
+  const handleContinueBranch = async (branchId: string) => {
+    await handleSwitchBranch(branchId)
+    setSubmode('story')
+  }
+
   const settingMode: SettingPanelMode = submode === 'story' || submode === 'timeline' || submode === 'director' ? 'lore' : submode
   const settingsWorkspaceVisible = submode !== 'story' && submode !== 'timeline' && submode !== 'director'
   const contentKey = settingsWorkspaceVisible ? `settings:${settingMode}` : submode
@@ -435,7 +441,21 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
               ) : submode === 'director' ? (
                 <DirectorBackstage storyId={currentStoryId} branchId={currentBranchId} snapshot={displaySnapshot} loading={snapshotPending} onSnapshotRefresh={() => reloadSnapshot(currentBranchId, currentStoryId, { silent: true })} />
               ) : submode === 'timeline' ? (
-                <BranchTimeline snapshot={displaySnapshot} branches={branches} currentBranchId={currentBranchId} onSwitchBranch={handleSwitchBranch} onCreateBranch={handleCreateBranch} onDeleteBranch={handleDeleteBranch} fill variant="workspace" onBackToStory={() => setSubmode('story')} headerControls={<StoryPicker stories={stories} currentStoryId={currentStoryId} onSelect={handleStorySelect} onCreate={() => undefined} onDeleteStories={handleDeleteStories} hideCreate />} />
+                isMobile ? (
+                  <StorylinesView
+                    snapshot={displaySnapshot}
+                    branches={branches}
+                    currentBranchId={currentBranchId}
+                    onSwitchBranch={handleSwitchBranch}
+                    onContinueBranch={handleContinueBranch}
+                    onCreateBranch={handleCreateBranch}
+                    onDeleteBranch={handleDeleteBranch}
+                    onBackToStory={() => setSubmode('story')}
+                    headerControls={<StoryPicker stories={stories} currentStoryId={currentStoryId} onSelect={handleStorySelect} onCreate={() => undefined} onDeleteStories={handleDeleteStories} hideCreate />}
+                  />
+                ) : (
+                  <BranchTimeline snapshot={displaySnapshot} branches={branches} currentBranchId={currentBranchId} onSwitchBranch={handleSwitchBranch} onCreateBranch={handleCreateBranch} onDeleteBranch={handleDeleteBranch} fill variant="workspace" onBackToStory={() => setSubmode('story')} headerControls={<StoryPicker stories={stories} currentStoryId={currentStoryId} onSelect={handleStorySelect} onCreate={() => undefined} onDeleteStories={handleDeleteStories} hideCreate />} />
+                )
               ) : isMobile ? (
                 storyStage
               ) : (

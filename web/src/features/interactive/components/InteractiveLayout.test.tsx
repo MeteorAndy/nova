@@ -36,6 +36,12 @@ vi.mock('./BranchTimeline', () => ({
   BranchTimeline: () => <div data-testid="branch-timeline" />,
 }))
 
+vi.mock('./StorylinesView', () => ({
+  StorylinesView: (props: { currentBranchId: string; branches: unknown[] }) => (
+    <div data-testid="storylines-view" data-branch-id={props.currentBranchId} data-branch-count={props.branches.length} />
+  ),
+}))
+
 vi.mock('./DirectorPanel', () => ({
   DirectorPanel: () => <div data-testid="director-panel" />,
 }))
@@ -309,6 +315,50 @@ describe('InteractiveLayout story selection', () => {
 })
 
 describe('InteractiveLayout mobile workspaces', () => {
+  it('renders the list-first storylines surface on mobile', async () => {
+    responsiveState.mobile = true
+    useInteractiveStore.setState({
+      stories: [story('st_1', '故事线')],
+      currentStoryId: 'st_1',
+      currentBranchId: 'main',
+      submode: 'timeline',
+      branches: [{ id: 'main', head: '', title: '主线', created_at: '2026-08-01T00:00:00Z', current: true }],
+      snapshot: { story_id: 'st_1', branch_id: 'main', turns: [], state: {} },
+    })
+    vi.mocked(getInteractiveStories).mockResolvedValue({
+      current_story_id: 'st_1',
+      stories: [story('st_1', '故事线')],
+    })
+
+    render(<InteractiveLayout workspace="/workspace" />)
+
+    await waitFor(() => expect(screen.getByTestId('storylines-view')).toBeInTheDocument())
+    expect(screen.getByTestId('storylines-view')).toHaveAttribute('data-branch-id', 'main')
+    expect(screen.getByTestId('storylines-view')).toHaveAttribute('data-branch-count', '1')
+    expect(screen.queryByTestId('branch-timeline')).not.toBeInTheDocument()
+  })
+
+  it('keeps the graph as the timeline surface on desktop', async () => {
+    responsiveState.mobile = false
+    useInteractiveStore.setState({
+      stories: [story('st_1', '故事线')],
+      currentStoryId: 'st_1',
+      currentBranchId: 'main',
+      submode: 'timeline',
+      branches: [{ id: 'main', head: '', title: '主线', created_at: '2026-08-01T00:00:00Z', current: true }],
+      snapshot: { story_id: 'st_1', branch_id: 'main', turns: [], state: {} },
+    })
+    vi.mocked(getInteractiveStories).mockResolvedValue({
+      current_story_id: 'st_1',
+      stories: [story('st_1', '故事线')],
+    })
+
+    render(<InteractiveLayout workspace="/workspace" />)
+
+    await waitFor(() => expect(screen.getByTestId('branch-timeline')).toBeInTheDocument())
+    expect(screen.queryByTestId('storylines-view')).not.toBeInTheDocument()
+  })
+
   it('opens the director as a full workspace without an edge-swipe drawer host', async () => {
     responsiveState.mobile = true
     vi.mocked(getInteractiveStories).mockResolvedValue({

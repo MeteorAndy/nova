@@ -1,0 +1,25 @@
+const storylines = {
+  'storylines.title': 'Storylines',
+  'storylines.empty': 'No storylines yet. Enter the first line on the story stage to begin.',
+  'storylines.current': 'Current',
+  'storylines.turnCount': '{{count}} turns',
+  'storylines.updatedAt': 'Updated {{time}}',
+  'storylines.divergenceFrom': 'Forks from "{{title}}"',
+  'storylines.fromBranch': 'From "{{name}}"',
+  'storylines.noSummary': 'No summary yet',
+  'storylines.openBranch': 'Open storyline {{title}}',
+  'storylines.backToList': 'Back to storyline list',
+  'storylines.graphOverview': 'Relation overview',
+  'storylines.continuePlaying': 'Continue Playing',
+  'storylines.switchBranch': 'Switch to this storyline',
+  'storylines.deleteBranch': 'Delete storyline {{name}}',
+  'storylines.deleteBranchTitle': 'Delete Storyline',
+  'storylines.confirmDelete': 'Delete storyline "{{name}}"?',
+  'storylines.deleteFailed': 'Failed to delete storyline',
+  'storylines.emptyBranch': 'This storyline has no story nodes yet.',
+  'storylines.head': 'HEAD',
+  'storylines.unknownBranch': 'Unknown storyline',
+  'storylines.mainBranch': 'Main',
+} as const
+
+export default storylines

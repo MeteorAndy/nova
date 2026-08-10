@@ -91,10 +91,10 @@
 | 71 | Latest-turn revision records | ✅ | turn narrative revision tests |
 | 72 | Historical edits create branches | ✅ | branch creation tests |
 | 73 | Original branch preserved | ✅ | branch history tests |
-| 74 | Storylines list-first on phone | 🟡 | Storylines surface exists; no story data browser case |
-| 75 | Branch item shows divergence/summary/count/time | 🟡 | branch list UI; field assertions not present |
-| 76 | Branch detail timeline operations | 🟡 | branch detail UI; flow not asserted |
-| 77 | Relation graph secondary on wide | 🟡 | graph component exists; tier behavior not asserted |
+| 74 | Storylines list-first on phone | ✅ | StorylinesView rendered for mobile timeline in InteractiveLayout.test.tsx; list-first tests in StorylinesView.test.tsx |
+| 75 | Branch item shows divergence/summary/count/time | ✅ | StorylinesView.test.tsx asserts current-first order, divergence, parent, latest summary, turn count, updated time |
+| 76 | Branch detail timeline operations | 🟡 | StorylinesView.test.tsx asserts vertical timeline, continue, switch, delete; rename remains a backend gap |
+| 77 | Relation graph secondary on wide | ✅ | mobile graph-overview toggle in StorylinesView.test.tsx; desktop timeline keeps BranchTimeline in InteractiveLayout.test.tsx |
 | 78 | Reference separates state and lore | ✅ | story-state model tests |
 | 79 | Current state read-only by default | ✅ | state display tests |
 | 80 | State edit requires full-screen revision | ✅ | CurrentStateRevisionWorkspace tests |

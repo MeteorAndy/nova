@@ -24,6 +24,7 @@ import writingAgent from './en-US/writingAgent'
 import tellerPicker from './en-US/tellerPicker'
 import storyPicker from './en-US/storyPicker'
 import branchTimeline from './en-US/branchTimeline'
+import storylines from './en-US/storylines'
 import storyStage from './en-US/storyStage'
 import snapshot from './en-US/snapshot'
 import directorPanel from './en-US/directorPanel'
@@ -65,6 +66,7 @@ const enUS = {
   ...tellerPicker,
   ...storyPicker,
   ...branchTimeline,
+  ...storylines,
   ...storyStage,
   ...snapshot,
   ...directorPanel,
