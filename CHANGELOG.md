@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 移动工作台可访问名称冒烟测试：所有可见按钮与图片必须有可读名称；完整读屏器审计仍待进行。
+- Mobile workbench accessible-name smoke test added: every visible button and image must have a readable name; a full screen-reader audit is still pending.
 - Agent 会话滚动位置按会话保留：切换会话后消息列表恢复各自滚动位置；结合会话草稿与运行状态恢复，故事 33 全部覆盖。
 - Agent message scroll is now preserved per session: switching sessions restores each session's scroll position; with per-session drafts and run-state resume, story 33 is fully covered.
 - 覆盖矩阵剩余缺口整理完成：明确故事 24/85 待设计确认、故事 101 待读屏审计，以及设备级验证范围。

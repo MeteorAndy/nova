@@ -89,6 +89,17 @@ describe('Mobile Workbench', () => {
     expect(within(navigation).getByRole('button', { name: '更多' })).toHaveAttribute('aria-current', 'page')
   })
 
+  it('移动工作台可见控件与图片都有可访问名称', () => {
+    render(<WorkbenchShell {...workbenchProps(<div>正文内容</div>)} />)
+
+    for (const button of screen.getAllByRole('button')) {
+      expect(button).toHaveAccessibleName()
+    }
+    for (const img of document.querySelectorAll('img')) {
+      expect(img).toHaveAccessibleName()
+    }
+  })
+
   it('shows actionable tasks in More and resumes the selected source workflow', async () => {
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' })
     server.use(

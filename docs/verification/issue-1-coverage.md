@@ -123,7 +123,7 @@
 | 98 | Coarse pointer keeps touch targets | ✅ | CDP measurement covers shell, task center, onboarding, toast, Settings controls, and Radix options at 320/390/430px |
 | 99 | Complete Simplified Chinese copy | ✅ | i18n alignment + zh browser run |
 | 100 | English long-text no truncation/overlap | ✅ | long-English book name browser case (320/390/430) |
-| 101 | Screen-reader semantics | 🟡 | aria labels present; SR audit not run |
+| 101 | Screen-reader semantics | 🟡 | mobile shell button/img accessible-name smoke test added; full SR audit still pending |
 | 102 | Keyboard core flows | ✅ | Escape/Tab focus tests + keyboard nav tests |
 | 103 | 200% font zoom accessibility | ✅ | zoom acceptance (CSS zoom 2x, no overflow) |
 | 104 | Reduce-motion respected | ✅ | motion intensity setting + provider |
