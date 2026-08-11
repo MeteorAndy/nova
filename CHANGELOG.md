@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 全局搜索跨正文、规划与资料验证：一次关键词查询可同时返回并展示三类结果，点击结果把结果与查询词交给打开动作。
+- Global search across manuscript, plans, and lore verified: one query returns and renders all three kinds of results, and selecting one hands the result and query to the open action.
 - Agent 输入草稿改为按会话隔离：切换会话后各自保留并恢复，不再跨会话共享；按会话保留滚动位置仍待实现。
 - Agent composer drafts are now isolated per session: switching sessions keeps and restores each session's own draft instead of sharing one; per-session scroll retention is still pending.
 - Agent 会话管理全屏流程验证：移动端“会话”视图替换对话界面，支持切换会话并通过“进入会话”返回对话。

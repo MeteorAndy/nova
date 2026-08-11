@@ -29,7 +29,7 @@
 | 19 | Save/offline/conflict status near title | ✅ | save status + conflict banner tests |
 | 20 | Project default shows outline | ✅ | Project surface + workspace summary tests |
 | 21 | Project keeps full file segments | ✅ | file tree + workspace API tests |
-| 22 | Search covers manuscript/plan/lore | 🟡 | search API + panel exist; combined scope not asserted |
+| 22 | Search covers manuscript/plan/lore | ✅ | SearchPanel.test.tsx asserts one query returns and renders chapters/plans/lore results and hands result + query to selection |
 | 23 | Chapter click opens manuscript | ✅ | integration test "returns to the manuscript" |
 | 24 | Project state restoration | 🟡 | kept-mounted routes; scroll/selection not asserted |
 | 25 | No drag during normal browse | ✅ | HomeView.test.tsx asserts no drag handle in recent mode; useSortable disabled outside manual mode |
