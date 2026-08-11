@@ -44,7 +44,7 @@
 | # | Story (short) | Status | Evidence |
 | --- | --- | --- | --- |
 | 31 | One full Agent session at a time | ✅ | Agent surface + integration tests |
-| 32 | Session management full screen | 🟡 | sessions API + UI exist; full-screen flow not browser-tested |
+| 32 | Session management full screen | ✅ | AgentPanel.test.tsx asserts Sessions view replaces the chat surface, session switching, and return to chat |
 | 33 | Per-session draft/scroll/run state | 🟡 | session state store exists; scroll not asserted |
 | 34 | Tool/sub-agent/diagnostics collapsible | ✅ | AgentMessageItem/List tests |
 | 35 | No automatic attachment on switch | ✅ | handoff design + tests |

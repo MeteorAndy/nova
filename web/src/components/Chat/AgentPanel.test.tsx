@@ -409,6 +409,29 @@ describe('AgentPanel', () => {
     await user.click(screen.getByRole('button', { name: '发送' }))
     expect(handleSend).not.toHaveBeenCalled()
   })
+
+  it('打开全屏会话管理，切换会话后可返回对话', async () => {
+    const user = userEvent.setup()
+    const onSwitchSession = vi.fn()
+    renderAgentPanel({
+      sessions: [
+        { id: 'session-1', title: '当前会话', active: true, message_count: 0, created_at: '', updated_at: '' },
+        { id: 'session-2', title: '写作计划', active: false, message_count: 5, created_at: '', updated_at: '' },
+      ],
+      onSwitchSession,
+    })
+
+    await user.click(screen.getByRole('button', { name: '会话' }))
+
+    expect(screen.getByRole('button', { name: /写作计划.*5 条/ })).toBeVisible()
+    expect(screen.queryByRole('button', { name: '发送' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /写作计划.*5 条/ }))
+    expect(onSwitchSession).toHaveBeenCalledWith('session-2')
+
+    await user.click(screen.getByRole('button', { name: '进入会话 写作计划' }))
+    expect(screen.getByRole('button', { name: '发送' })).toBeInTheDocument()
+  })
 })
 
 type AgentPanelOverrides = Partial<Omit<ComponentProps<typeof AgentPanel>, 'composerSettings'>>
