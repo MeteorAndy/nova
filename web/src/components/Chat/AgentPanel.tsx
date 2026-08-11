@@ -347,7 +347,7 @@ export function AgentPanel({
     disabled: isStreaming,
     planMode,
     onTogglePlanMode: onPlanModeToggle,
-    draftKey: `ide-agent:${workspace || 'global'}`,
+    draftKey: `ide-agent:${workspace || 'global'}:${activeSessionId || 'current'}`,
     inputPrefill,
     onInputPrefillConsumed: () => setInputPrefill(null),
     referencedFiles: references,

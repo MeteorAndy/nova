@@ -432,6 +432,28 @@ describe('AgentPanel', () => {
     await user.click(screen.getByRole('button', { name: '进入会话 写作计划' }))
     expect(screen.getByRole('button', { name: '发送' })).toBeInTheDocument()
   })
+
+  it('切换会话后保留各自独立的输入草稿', async () => {
+    const user = userEvent.setup()
+    const overrides: AgentPanelOverrides = {
+      activeSessionId: 'draft-s1',
+      sessions: [
+        { id: 'draft-s1', title: '草稿会话一', active: true, message_count: 0, created_at: '', updated_at: '' },
+        { id: 'draft-s2', title: '草稿会话二', active: false, message_count: 0, created_at: '', updated_at: '' },
+      ],
+    }
+    const view = renderAgentPanel(overrides)
+
+    await user.type(screen.getByRole('textbox'), '草稿')
+
+    overrides.activeSessionId = 'draft-s2'
+    view.rerenderOwner()
+    await waitFor(() => expect(screen.getByRole('textbox')).toHaveTextContent(''))
+
+    overrides.activeSessionId = 'draft-s1'
+    view.rerenderOwner()
+    expect(screen.getByRole('textbox')).toHaveTextContent('草稿')
+  })
 })
 
 type AgentPanelOverrides = Partial<Omit<ComponentProps<typeof AgentPanel>, 'composerSettings'>>
@@ -444,11 +466,19 @@ function renderAgentPanel(overrides: AgentPanelOverrides = {}) {
     })
     return <AgentPanel {...defaultAgentPanelProps(overrides, composerSettings)} />
   }
-  return render(
+  const view = render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: 1200, itemHeight: 52 }}>
       <Owner />
     </VirtuosoMockContext.Provider>,
   )
+  return {
+    ...view,
+    rerenderOwner: () => view.rerender(
+      <VirtuosoMockContext.Provider value={{ viewportHeight: 1200, itemHeight: 52 }}>
+        <Owner />
+      </VirtuosoMockContext.Provider>,
+    ),
+  }
 }
 
 function defaultAgentPanelProps(
@@ -462,7 +492,7 @@ function defaultAgentPanelProps(
     tellers: [{ id: 'classic', name: '默认叙事', style_rules: [] } as any],
     messages: [],
     sessions: [{ id: 'session-1', title: '当前会话', active: true, message_count: 0, created_at: '', updated_at: '' }],
-    activeSessionId: 'session-1',
+    activeSessionId: overrides.activeSessionId ?? 'session-1',
     isStreaming: false,
     activityContent: '',
     hasEarlierMessages: false,

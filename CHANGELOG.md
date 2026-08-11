@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Agent 输入草稿改为按会话隔离：切换会话后各自保留并恢复，不再跨会话共享；按会话保留滚动位置仍待实现。
+- Agent composer drafts are now isolated per session: switching sessions keeps and restores each session's own draft instead of sharing one; per-session scroll retention is still pending.
 - Agent 会话管理全屏流程验证：移动端“会话”视图替换对话界面，支持切换会话并通过“进入会话”返回对话。
 - Agent session management full-screen flow verified: the mobile Sessions view replaces the chat surface, supports session switching, and returns to chat.
 - 书架排序行为验证：普通浏览模式不显示拖拽手柄且排序被禁用，切换到手动排序后显示拖拽手柄。
