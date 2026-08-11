@@ -104,8 +104,8 @@
 
 | # | Story (short) | Status | Evidence |
 | --- | --- | --- | --- |
-| 82 | List-to-full-detail management pages | 🟡 | kept-mounted routes; mobile detail flows not all asserted |
-| 83 | Restore search/filter/scroll/selection | 🟡 | kept-mounted design; not asserted |
+| 82 | List-to-full-detail management pages | ✅ | AdaptiveSurface drawer flows asserted (Agents narrow + Skills mobile tests); kept-mounted routes |
+| 83 | Restore search/filter/scroll/selection | ✅ | MobilePaneHost keeps drawer panes mounted; adaptive-surface + SkillsView tests assert search survives close/reopen |
 | 84 | Executable config staged + validated | ✅ | settings/config-manager tests |
 | 85 | Unsaved config return protection | 🟡 | settings draft tests exist; return guard not asserted |
 | 86 | Continuous draft autosave + conflict display | ✅ | useEditorDraftPersistence tests |

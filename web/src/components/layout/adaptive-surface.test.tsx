@@ -55,7 +55,7 @@ describe('AdaptiveSurface', () => {
     const user = userEvent.setup()
     render(adaptiveSurface())
 
-    expect(screen.queryByTestId('left-pane')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('left-pane')).not.toBeVisible()
     expect(screen.getByTestId('main-pane').parentElement).toHaveClass('h-full', 'min-h-0', 'flex-col')
 
     await user.click(screen.getByRole('button', { name: 'Open left' }))
@@ -64,6 +64,37 @@ describe('AdaptiveSurface', () => {
     await user.click(screen.getByRole('button', { name: /关闭|Close/ }))
     await user.click(screen.getByRole('button', { name: 'Open right' }))
     expect(screen.getByTestId('right-pane').closest('[data-state="open"]')).toBeTruthy()
+  })
+
+  it('keeps drawer pane content mounted so search state survives close and reopen', async () => {
+    setMobileViewport(true)
+    const user = userEvent.setup()
+    render(
+      <AdaptiveSurface
+        left={{
+          id: 'left',
+          title: 'Left',
+          side: 'left',
+          content: <StatefulSearchInput />,
+        }}
+      >
+        {({ openLeft }) => (
+          <div>
+            <button type="button" onClick={openLeft}>Open left</button>
+          </div>
+        )}
+      </AdaptiveSurface>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Open left' }))
+    await user.type(screen.getByRole('textbox', { name: 'Search' }), 'persist')
+    await user.click(screen.getByRole('button', { name: /关闭|Close/ }))
+
+    expect(screen.queryByRole('textbox', { name: 'Search' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Open left' }))
+
+    expect(screen.getByRole('textbox', { name: 'Search' })).toHaveValue('persist')
   })
 
   it('collapses panes at its own width on desktop and expands them again', async () => {
@@ -76,7 +107,7 @@ describe('AdaptiveSurface', () => {
 
     resize(640)
 
-    expect(screen.queryByTestId('left-pane')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('left-pane')).not.toBeVisible()
     expect(container.querySelector('[data-nova-mobile-pane-host="true"]')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Open left' }))
     expect(screen.getByTestId('left-pane').closest('[data-state="open"]')).toBeTruthy()
@@ -138,7 +169,7 @@ describe('AdaptiveSurface', () => {
 
     resize(900)
 
-    expect(screen.queryByTestId('left-pane')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('left-pane')).not.toBeVisible()
     expect(container.querySelector('[data-nova-mobile-pane-host="true"]')).toBeInTheDocument()
   })
 
@@ -147,7 +178,7 @@ describe('AdaptiveSurface', () => {
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 640 } as DOMRect)
 
     expect(() => render(adaptiveSurface(700))).not.toThrow()
-    expect(screen.queryByTestId('left-pane')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('left-pane')).not.toBeVisible()
     expect(document.querySelector('[data-nova-mobile-pane-host="true"]')).toBeInTheDocument()
   })
 
@@ -161,8 +192,8 @@ describe('AdaptiveSurface', () => {
     fireEvent.mouseDown(host, { button: 0, clientX: 389, clientY: 120 })
     fireEvent.mouseUp(window, { clientX: 320, clientY: 124 })
 
-    expect(screen.queryByTestId('left-pane')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('right-pane')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('left-pane')).not.toBeVisible()
+    expect(screen.queryByTestId('right-pane')).not.toBeVisible()
   })
 })
 
@@ -188,6 +219,17 @@ function StatefulMainPane({ onUnmount }: { onUnmount: () => void }) {
   const [count, setCount] = useState(0)
   useEffect(() => onUnmount, [onUnmount])
   return <button type="button" onClick={() => setCount((current) => current + 1)}>Count {count}</button>
+}
+
+function StatefulSearchInput() {
+  const [value, setValue] = useState('')
+  return (
+    <input
+      aria-label="Search"
+      value={value}
+      onChange={(event) => setValue(event.target.value)}
+    />
+  )
 }
 
 function setMobileViewport(matches: boolean) {

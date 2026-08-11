@@ -77,25 +77,29 @@ export function MobilePaneHost({
   return (
     <div className={className} data-nova-mobile-pane-host="true">
       {typeof children === 'function' ? children(controls) : children}
-      {openPane ? (
+      {panes.map((pane) => (
         <MobileDrawer
-          pane={openPane}
+          key={pane.id}
+          pane={pane}
+          open={pane.id === openPaneId}
           closeLabel={closeLabel}
-          side={openPane.side}
+          side={pane.side}
           onClose={() => setOpenPaneId(null)}
         />
-      ) : null}
+      ))}
     </div>
   )
 }
 
 function MobileDrawer({
   pane,
+  open,
   closeLabel,
   side,
   onClose,
 }: {
   pane: MobilePane
+  open: boolean
   closeLabel: string
   side: 'left' | 'right'
   onClose: () => void
@@ -107,17 +111,21 @@ function MobileDrawer({
 
   return (
     <>
-      <div
-        aria-hidden="true"
-        data-nova-mobile-pane-overlay="true"
-        className="fixed inset-0 z-50 bg-black/50"
-        onClick={onClose}
-      />
+      {open && (
+        <div
+          aria-hidden="true"
+          data-nova-mobile-pane-overlay="true"
+          className="fixed inset-0 z-50 bg-black/50"
+          onClick={onClose}
+        />
+      )}
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        data-state="open"
+        hidden={!open}
+        aria-hidden={!open}
+        data-state={open ? 'open' : 'closed'}
         data-nova-mobile-pane-content="true"
         data-side={side}
         className={`fixed inset-y-0 z-50 flex w-[min(92vw,420px)] max-w-none flex-col gap-0 border-[var(--nova-border)] bg-[var(--nova-surface-2)] p-0 text-[var(--nova-text)] shadow-[var(--nova-shadow)] sm:max-w-none ${sideClassName} ${pane.className || ''}`}

@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 移动抽屉改为常驻挂载：关闭列表抽屉不再卸载内容，Skills 等管理页的搜索、筛选与滚动状态在返回后保留。
+- Mobile drawers now stay mounted: closing the list drawer no longer unmounts its content, so search, filter, and scroll state survive return on Skills and other management pages.
 - 平板/宽屏双栏验证：Agents 管理页在空间足够时同时显示 Agent 列表与详情，窄屏自动收进抽屉并可打开。
 - Tablet/wide two-pane verified: the Agents management page shows the agent list and detail side by side when space allows, and collapses the list into an openable drawer on narrow screens.
 - 剧情线分支支持重命名：移动端详情可打开重命名对话框，保存后分支列表与关系图立即显示新名称；新增 `PATCH /api/interactive/stories/:id/branches/:branch` 接口。
