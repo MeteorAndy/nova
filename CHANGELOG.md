@@ -8,8 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- 新增两份架构设计文档：移动工作台状态恢复（故事 24/33）与可执行配置返回保护（故事 85），实现前待确认。
-- Added two architecture design docs: mobile workbench state restoration (stories 24/33) and executable config return guard (story 85), pending confirmation before implementation.
+- 新增两份设计文档：移动工作台状态恢复（故事 24/33）与可执行配置返回保护（故事 85），实现前待确认。
+- Added two design docs: mobile workbench state restoration (stories 24/33) and executable config return guard (story 85), pending confirmation before implementation.
 - 全局搜索跨正文、规划与资料验证：一次关键词查询可同时返回并展示三类结果，点击结果把结果与查询词交给打开动作。
 - Global search across manuscript, plans, and lore verified: one query returns and renders all three kinds of results, and selecting one hands the result and query to the open action.
 - Agent 输入草稿改为按会话隔离：切换会话后各自保留并恢复，不再跨会话共享；按会话保留滚动位置仍待实现。
