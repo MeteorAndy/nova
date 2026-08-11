@@ -15,24 +15,24 @@ permissions:
 
 jobs:
   check-title:
-    name: Check PR title
+    name: Check English title
     runs-on: ubuntu-latest
 
     steps:
-      - name: Require a readable PR title
+      - name: Require English PR title
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          if [ -z "${PR_TITLE}" ]; then
-            echo "PR title must not be empty."
-            echo "PR 标题不能为空。"
+          if ! printf '%s' "${PR_TITLE}" | LC_ALL=C grep -Eq '^[ -~]+$'; then
+            echo "PR title must use English/ASCII characters only."
+            echo "PR 标题只能使用英文/ASCII 字符。"
             echo "Current title: ${PR_TITLE}"
             exit 1
           fi
 
-          if ! printf '%s' "${PR_TITLE}" | grep -Pq '[\p{L}]'; then
-            echo "PR title must include at least one letter (any script)."
-            echo "PR 标题至少需要包含一个字母（任意文字）。"
+          if ! printf '%s' "${PR_TITLE}" | grep -Eq '[A-Za-z]'; then
+            echo "PR title must include at least one English letter."
+            echo "PR 标题至少需要包含一个英文字母。"
             echo "Current title: ${PR_TITLE}"
             exit 1
           fi
