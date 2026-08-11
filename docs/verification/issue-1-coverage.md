@@ -130,6 +130,8 @@
 
 ## Remaining gaps
 
-- Device-only verification: safe-area insets and the real system-notification permission flow on hardware.
-- Human/vision review remains incomplete across all surfaces; Settings was visually inspected at 320px in zh-CN/dark and en-US/light.
-- Explicit tests for a few 🟡 rows (long-title truncation, project-switch save failure, mobile two-pane at wide tablet, screen-reader pass).
+- 故事 24（项目工作面状态恢复）与故事 85（可执行配置返回保护）：设计文档已提交（docs/verification/mobile-workbench-state-restoration-design.md、executable-config-return-guard-design.md），等待确认后按 TDD 实现。
+- 故事 33（每会话草稿/滚动/运行状态）：输入草稿与运行状态已验证，会话滚动保留已纳入状态恢复设计，等待确认后实现。
+- 故事 101（屏幕阅读器语义）：需要读屏器人工/工具审计，当前环境无对应工具。
+- 设备级验证：safe-area 安全区与系统通知权限流程需要真机。
+- 人工视觉审查仍不完整：Settings 已在 320px 中文深色与英文浅色下检查。
