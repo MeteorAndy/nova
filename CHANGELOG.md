@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 编辑器按文档滚动位置恢复已验证：切换文件后各自滚动位置保留；光标恢复仍待实现。
+- Editor per-document scroll restoration verified: each file keeps its own scroll position across switches; cursor restoration remains pending.
 - 新增两份设计文档：移动工作台状态恢复（故事 24/33）与可执行配置返回保护（故事 85），实现前待确认。
 - Added two design docs: mobile workbench state restoration (stories 24/33) and executable config return guard (story 85), pending confirmation before implementation.
 - 全局搜索跨正文、规划与资料验证：一次关键词查询可同时返回并展示三类结果，点击结果把结果与查询词交给打开动作。

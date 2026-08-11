@@ -1470,6 +1470,31 @@ describe('MarkdownEditor', () => {
     expect(tiptapMock.editor.view.updateState).toHaveBeenCalled()
   })
 
+  it('切换文件时保存并恢复各自的滚动位置', async () => {
+    const { rerender } = render(
+      <MarkdownEditor workspace="/books/demo" fileName="chapters/ch01.md" content="第一章" onSave={vi.fn()} />,
+    )
+    const container = screen.getByTestId('editor-content').parentElement as HTMLElement
+    container.scrollTop = 320
+
+    rerender(
+      <MarkdownEditor workspace="/books/demo" fileName="chapters/ch02.md" content="第二章" onSave={vi.fn()} />,
+    )
+    await act(async () => {
+      await new Promise((resolve) => window.requestAnimationFrame(resolve))
+    })
+    expect(container.scrollTop).toBe(0)
+
+    container.scrollTop = 180
+    rerender(
+      <MarkdownEditor workspace="/books/demo" fileName="chapters/ch01.md" content="第一章" onSave={vi.fn()} />,
+    )
+    await act(async () => {
+      await new Promise((resolve) => window.requestAnimationFrame(resolve))
+    })
+    expect(container.scrollTop).toBe(320)
+  })
+
   it('点击生成本章插画按钮时提交当前章节路径', async () => {
     const user = userEvent.setup()
     const onGenerateIllustration = vi.fn()

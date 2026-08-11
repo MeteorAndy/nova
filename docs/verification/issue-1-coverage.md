@@ -25,7 +25,7 @@
 | 15 | At most two frequent actions | ✅ | header render structure |
 | 16 | One manuscript document at a time | ✅ | MarkdownEditor isolation tests |
 | 17 | Title opens recent documents | ✅ | Recent documents UI present; API tests |
-| 18 | Per-document draft/cursor/scroll/undo | 🟡 | undo isolation + draft persistence tests; cursor/scroll restore not asserted |
+| 18 | Per-document draft/cursor/scroll/undo | 🟡 | draft persistence, undo isolation, and per-file scroll restore asserted; cursor restore remains pending |
 | 19 | Save/offline/conflict status near title | ✅ | save status + conflict banner tests |
 | 20 | Project default shows outline | ✅ | Project surface + workspace summary tests |
 | 21 | Project keeps full file segments | ✅ | file tree + workspace API tests |
