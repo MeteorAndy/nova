@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 断线门禁扩展：离线时 Agent 输入发送按钮禁用并提示，结构迁移（新建/重命名/移动/删除）被阻止并显示明确错误；恢复连接后自动恢复可用。
+- Offline gates extended: the Agent composer send control is disabled with a clear message, and structure migration (create/rename/move/delete) is blocked with an explicit error while offline; both recover when back online.
 - 编辑器按文档滚动位置恢复已验证：切换文件后各自滚动位置保留；光标恢复仍待实现。
 - Editor per-document scroll restoration verified: each file keeps its own scroll position across switches; cursor restoration remains pending.
 - 新增两份设计文档：移动工作台状态恢复（故事 24/33）与可执行配置返回保护（故事 85），实现前待确认。

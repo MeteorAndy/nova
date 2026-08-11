@@ -113,7 +113,7 @@
 | 88 | Short offline editing of open docs | ✅ | pending-drafts tests |
 | 89 | Offline edits bound to project + base version | ✅ | pending-drafts + editor tests |
 | 90 | Remote changes enter conflict review | ✅ | offline conflict-path test |
-| 91 | No submit/switch/migration while offline | 🟡 | App.save-before-project-switch.integration.test.tsx covers offline switch with and without dirty draft; submit/migration offline gates remain covered by natural failure paths only |
+| 91 | No submit/switch/migration while offline | 🟡 | offline switch, Agent composer submit, and structure migration gates verified (App integration + InputArea tests); story-stage submit remains natural-failure only |
 | 92 | Top/Android/browser share one back stack | ✅ | popstate + Escape tests |
 | 93 | Back priority: keyboard/surface/unsaved/full-screen | ✅ | Escape + dialog-first tests |
 | 94 | No left/right edge gestures | ✅ | no edge-swipe code in mobile shell |

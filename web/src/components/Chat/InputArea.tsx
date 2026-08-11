@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useKeyboardInset } from '@/hooks/useKeyboardInset'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useOnlineStatus } from '@/hooks/use-online-status'
 import { ReviewFeedbackTray, reviewFeedbackCommentCount, type ReviewFeedbackBatch, type ReviewFeedbackComment, type ReviewFeedbackSelection } from '@/features/changes/agent/ReviewFeedbackTray'
 import { ContextHandoffTray } from './ContextHandoffTray'
 
@@ -151,6 +152,7 @@ export function InputArea({
   const { t } = useTranslation()
   const keyboardInset = useKeyboardInset()
   const isMobile = useIsMobile()
+  const online = useOnlineStatus()
   const [value, setValue] = useState(() => draftKey ? inputDrafts.get(draftKey) || '' : '')
   const [tokenUsageOpen, setTokenUsageOpen] = useState(false)
   const [showCommands, setShowCommands] = useState(false)
@@ -393,7 +395,7 @@ export function InputArea({
   /** 发送消息 */
   const handleSend = () => {
     const trimmed = value.trim()
-    if ((!trimmed && !hasReviewFeedback) || disabled || submittingRef.current) return
+    if ((!trimmed && !hasReviewFeedback) || disabled || !online || submittingRef.current) return
     const submittedValue = value
     submittingRef.current = true
     setSubmitting(true)
@@ -652,12 +654,13 @@ export function InputArea({
           <Button
             type="button"
             onClick={disabled ? onStop : handleSend}
-            disabled={disabled ? !onStop : submitting || (!value.trim() && !hasReviewFeedback)}
+            disabled={disabled ? !onStop : submitting || !online || (!value.trim() && !hasReviewFeedback)}
             size="icon-sm"
+            title={!online ? t('chat.input.offlineDisabled') : undefined}
             className={`nova-agent-composer-submit h-9 w-9 shrink-0 rounded-[10px] text-[var(--nova-text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] ${
               disabled ? 'bg-[var(--nova-danger-bg)] hover:bg-[var(--nova-danger-bg)]' : 'bg-[var(--nova-active)] hover:bg-[var(--nova-hover)] disabled:bg-[var(--nova-active)]'
             }`}
-            aria-label={disabled ? t('chat.input.stop') : t('chat.input.send')}
+            aria-label={disabled ? t('chat.input.stop') : !online ? t('chat.input.offlineDisabled') : t('chat.input.send')}
           >
             {disabled ? <Square className="h-3.5 w-3.5 fill-current" /> : <Send className="h-4 w-4" />}
           </Button>

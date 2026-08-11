@@ -52,6 +52,7 @@ const chat = {
   'chat.history.loadEarlier': 'Load earlier messages',
   'chat.history.loadingEarlier': 'Loading earlier messages…',
   'chat.input.placeholder': 'Type a message. Enter to send, Shift+Enter for newline',
+  'chat.input.offlineDisabled': 'Cannot send while offline. Retry after reconnecting.',
   'chat.input.placeholderWithSkills': 'Message, / for commands or Skills',
   'chat.input.disabledPlaceholder': 'AI is responding...',
   'chat.input.actions': 'Input actions',

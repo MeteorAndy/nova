@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
@@ -31,6 +31,7 @@ function workspaceHandlers(
   saveRequests: unknown[],
   switchRequests: unknown[],
   options: { offlineSave?: boolean; offlineSwitch?: boolean } = {},
+  deleteRequests: unknown[] = [],
 ) {
   return [
     http.get('/api/workspace/current', () =>
@@ -87,6 +88,10 @@ function workspaceHandlers(
       switchRequests.push(await request.json())
       if (options.offlineSwitch) return HttpResponse.error()
       return HttpResponse.json({ workspace: WORKSPACE_TWO, message: 'ok' })
+    }),
+    http.post('/api/workspace/delete', async ({ request }) => {
+      deleteRequests.push(await request.json())
+      return HttpResponse.json({ status: 'ok' })
     }),
     http.get('/api/tasks', () =>
       HttpResponse.json({ action_required_count: 0, tasks: [] }),
@@ -249,5 +254,31 @@ describe('应用级项目切换保存保护', () => {
 
     await user.keyboard('{Escape}')
     expect(screen.getByRole('button', { name: '切换书籍，当前：创作项目一' })).toBeInTheDocument()
+  })
+
+  it('断线时禁止结构迁移并显示明确错误', async () => {
+    const user = userEvent.setup()
+    const deleteRequests: unknown[] = []
+    server.use(...workspaceHandlers([], [], {}, deleteRequests))
+    server.use(
+      http.get('/api/workspace/tree', () =>
+        HttpResponse.json([
+          { name: '第一章.md', type: 'file', path: 'chapters/ch01.md', children: [] },
+        ]),
+      ),
+    )
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+
+    renderApp()
+
+    const navigation = await screen.findByRole('navigation', { name: '移动端工作台导航' })
+    await user.click(within(navigation).getByRole('button', { name: '项目' }))
+    await user.click(screen.getByRole('button', { name: '项目文件' }))
+    await user.click(await screen.findByRole('button', { name: '更多操作' }))
+    await user.click(await screen.findByRole('menuitem', { name: '删除' }))
+    await user.click(await screen.findByRole('button', { name: '删除' }))
+
+    expect(await screen.findByText('离线时不能执行此操作，恢复连接后重试')).toBeInTheDocument()
+    expect(deleteRequests).toHaveLength(0)
   })
 })

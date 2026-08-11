@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -197,6 +197,22 @@ describe('InputArea command menu', () => {
 
     expect(handleSend).toHaveBeenCalledWith(submittedText)
     expect(screen.getByRole('textbox')).toHaveTextContent(submittedText)
+  })
+
+  it('disables sending while offline and re-enables it after reconnecting', async () => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+    const user = userEvent.setup()
+    const handleSend = vi.fn()
+    render(<InputArea onSend={handleSend} disabled={false} />)
+
+    await user.type(screen.getByRole('textbox'), '草稿')
+    const send = screen.getByRole('button', { name: '离线时不能发送，恢复连接后重试' })
+    expect(send).toBeDisabled()
+
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+    act(() => window.dispatchEvent(new Event('online')))
+
+    expect(screen.getByRole('button', { name: '发送' })).toBeEnabled()
   })
 
   it('submits selected review feedback only once while the request is being accepted', async () => {

@@ -52,6 +52,7 @@ const chat = {
   'chat.history.loadEarlier': '加载更早消息',
   'chat.history.loadingEarlier': '正在加载更早消息…',
   'chat.input.placeholder': '输入消息，Enter 发送，Shift+Enter 换行',
+  'chat.input.offlineDisabled': '离线时不能发送，恢复连接后重试',
   'chat.input.placeholderWithSkills': '输入消息，/ 选择命令或 Skills',
   'chat.input.disabledPlaceholder': 'AI 正在回复…',
   'chat.input.actions': '输入动作',
