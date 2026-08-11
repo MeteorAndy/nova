@@ -32,8 +32,8 @@
 | 22 | Search covers manuscript/plan/lore | 🟡 | search API + panel exist; combined scope not asserted |
 | 23 | Chapter click opens manuscript | ✅ | integration test "returns to the manuscript" |
 | 24 | Project state restoration | 🟡 | kept-mounted routes; scroll/selection not asserted |
-| 25 | No drag during normal browse | 🟡 | dnd gated in UI; not asserted |
-| 26 | Sort mode shows handles | 🟡 | sort mode exists; handle visibility not asserted |
+| 25 | No drag during normal browse | ✅ | HomeView.test.tsx asserts no drag handle in recent mode; useSortable disabled outside manual mode |
+| 26 | Sort mode shows handles | ✅ | HomeView.test.tsx asserts drag handle appears after switching to manual sort |
 | 27 | Keyboard hides primary nav | ✅ | integration test "bottom area to the focused input" |
 | 28 | Stable mobile edit toolbar | ✅ | EditorToolbar tests |
 | 29 | Selection swaps toolbar actions | ✅ | selection toolbar tests |

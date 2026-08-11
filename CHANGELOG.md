@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 书架排序行为验证：普通浏览模式不显示拖拽手柄且排序被禁用，切换到手动排序后显示拖拽手柄。
+- Bookshelf sorting behavior verified: drag handles stay hidden and sorting stays disabled during normal browsing, and handles appear after switching to manual sort.
 - 移动抽屉改为常驻挂载：关闭列表抽屉不再卸载内容，Skills 等管理页的搜索、筛选与滚动状态在返回后保留。
 - Mobile drawers now stay mounted: closing the list drawer no longer unmounts its content, so search, filter, and scroll state survive return on Skills and other management pages.
 - 平板/宽屏双栏验证：Agents 管理页在空间足够时同时显示 Agent 列表与详情，窄屏自动收进抽屉并可打开。
