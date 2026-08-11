@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 移动端输入行控件统一为 40px 并保持中心对齐：写作 Agent 与游戏故事的“输入动作/模型切换/发送”按钮不再出现 32px 与 36px 混排导致的错位和大小不一；目录树“更多操作”按钮在手机和平板上放大到 44px 触控目标，平板侧栏不再因 hover 才显示而不可点。
+- Mobile composer rows now use a uniform 40px control height with aligned centers: the action, model-switch, and send buttons in both the writing Agent and game story input rows no longer mix 32px and 36px sizes; the FileTree overflow menu button grows to a 44px touch target on phones and tablets, so the tablet sidebar is no longer hover-only.
 - 移动端文本溢出策略落地（ADR 0030）：剧情线页标题、开场方式标签、空状态提示等固定短词在窄屏不再被省略号截断，同排次要控件在窄屏自动收起文字；目录树文件名、章节标题、工作区路径、预设标题等长内容保留省略号并补齐完整内容提示（title）。
 - Mobile text overflow policy implemented (ADR 0030): fixed short labels such as the storylines header, opening-mode tabs, and empty-state hints are no longer clipped on narrow screens, while secondary controls collapse to icons; long user content (file names, chapter titles, workspace paths, preset titles) keeps ellipsis but now exposes the full value via title hints.
 - 项目工作面恢复补全（故事 24）：目录树展开状态与侧栏滚动位置按创作项目记忆，切到正文再返回“项目”后目录展开与滚动位置保持一致；搜索词恢复同时强化为可重渲染的受控记忆。

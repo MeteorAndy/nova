@@ -1556,7 +1556,7 @@ export function StoryStage({ workspace, styleSceneSuggestions = [], stories = []
                         type="button"
                         variant="outline"
                         size="icon-sm"
-                        className="nova-agent-composer-icon h-8 w-8 shrink-0 rounded-[10px] border border-[var(--nova-border)] bg-[var(--nova-surface)] text-[var(--nova-text-muted)] hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text)] disabled:opacity-45"
+                        className="nova-agent-composer-icon h-10 w-10 shrink-0 rounded-[10px] border border-[var(--nova-border)] bg-[var(--nova-surface)] text-[var(--nova-text-muted)] hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text)] disabled:opacity-45"
                         disabled={streaming || branchTerminal || directorBlocking || (!storyId && tokenUsageMessages.length === 0)}
                         aria-label={t('chat.input.actions')}
                         title={t('chat.input.actions')}
@@ -1592,7 +1592,7 @@ export function StoryStage({ workspace, styleSceneSuggestions = [], stories = []
                 <>
                   <ModelProfileSwitcher agentKey="interactive_story" workspace={workspace} disabled={streaming || directorBlocking} />
                   {hotChoices.length > 3 ? (
-                    <Button type="button" variant="outline" className={`nova-agent-composer-pill h-8 shrink-0 rounded-[10px] border-[var(--nova-border)] bg-[var(--nova-surface)] px-2.5 text-[11px] text-[var(--nova-text-muted)] hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text)] ${hotChoicesExpanded ? 'text-[var(--nova-text)]' : ''}`} disabled={!canUseHotChoices} onMouseDown={(event) => event.preventDefault()} onClick={toggleHotChoices} aria-label={hotChoicesExpanded ? t('storyStage.hotChoices.collapse') : t('storyStage.hotChoices.button')} title={hotChoicesExpanded ? t('storyStage.hotChoices.collapse') : t('storyStage.hotChoices.button')}>
+                    <Button type="button" variant="outline" className={`nova-agent-composer-pill h-10 shrink-0 rounded-[10px] border-[var(--nova-border)] bg-[var(--nova-surface)] px-2.5 text-[11px] text-[var(--nova-text-muted)] hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text)] ${hotChoicesExpanded ? 'text-[var(--nova-text)]' : ''}`} disabled={!canUseHotChoices} onMouseDown={(event) => event.preventDefault()} onClick={toggleHotChoices} aria-label={hotChoicesExpanded ? t('storyStage.hotChoices.collapse') : t('storyStage.hotChoices.button')} title={hotChoicesExpanded ? t('storyStage.hotChoices.collapse') : t('storyStage.hotChoices.button')}>
                       <Compass className="h-3.5 w-3.5" />
                       {!isMobile ? t('storyStage.hotChoices.button') : null}
                     </Button>
@@ -1601,7 +1601,7 @@ export function StoryStage({ workspace, styleSceneSuggestions = [], stories = []
               }
               submitControl={
                 <Button
-                  className={`nova-agent-composer-submit h-9 w-9 shrink-0 rounded-[10px] px-0 text-[var(--nova-text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${streaming ? 'bg-[var(--nova-danger-bg)] hover:bg-[var(--nova-danger-bg)]' : 'bg-[var(--nova-active)] hover:bg-[var(--nova-hover)]'}`}
+                  className={`nova-agent-composer-submit h-10 w-10 shrink-0 rounded-[10px] px-0 text-[var(--nova-text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${streaming ? 'bg-[var(--nova-danger-bg)] hover:bg-[var(--nova-danger-bg)]' : 'bg-[var(--nova-active)] hover:bg-[var(--nova-hover)]'}`}
                   disabled={streaming ? false : !online || !storyId || branchTerminal || directorBlocking || !input.trim()}
                   onClick={() => {
                     streaming ? stop() : void send()

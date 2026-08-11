@@ -591,7 +591,7 @@ export function InputArea({
                 <Button
                   type="button"
                   size="icon-sm"
-                  className="nova-agent-composer-icon h-8 w-8 shrink-0 rounded-[10px] border border-[var(--nova-border)] bg-[var(--nova-surface)] text-[var(--nova-text-muted)] hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text)] disabled:opacity-45"
+                  className="nova-agent-composer-icon h-10 w-10 shrink-0 rounded-[10px] border border-[var(--nova-border)] bg-[var(--nova-surface)] text-[var(--nova-text-muted)] hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text)] disabled:opacity-45"
                   disabled={!onTogglePlanMode && !writingSkillControl && !onContextAnalyze && tokenUsageMessages.length === 0}
                   aria-label={t('chat.input.actions')}
                   title={t('chat.input.actions')}
@@ -657,7 +657,7 @@ export function InputArea({
             disabled={disabled ? !onStop : submitting || !online || (!value.trim() && !hasReviewFeedback)}
             size="icon-sm"
             title={!online ? t('chat.input.offlineDisabled') : undefined}
-            className={`nova-agent-composer-submit h-9 w-9 shrink-0 rounded-[10px] text-[var(--nova-text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] ${
+            className={`nova-agent-composer-submit h-10 w-10 shrink-0 rounded-[10px] text-[var(--nova-text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] ${
               disabled ? 'bg-[var(--nova-danger-bg)] hover:bg-[var(--nova-danger-bg)]' : 'bg-[var(--nova-active)] hover:bg-[var(--nova-hover)] disabled:bg-[var(--nova-active)]'
             }`}
             aria-label={disabled ? t('chat.input.stop') : !online ? t('chat.input.offlineDisabled') : t('chat.input.send')}

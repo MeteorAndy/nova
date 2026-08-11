@@ -752,7 +752,7 @@ function NodeDropdown({ actions }: { actions: TreeAction[] }) {
           type="button"
           aria-label={label}
           title={label}
-          className="pointer-events-none mr-1 flex shrink-0 items-center justify-center rounded p-0.5 text-[var(--nova-tree-icon)] opacity-0 transition-opacity hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text)] focus-visible:pointer-events-auto focus-visible:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100 data-[state=open]:pointer-events-auto data-[state=open]:opacity-100 max-md:pointer-events-auto max-md:opacity-100 max-md:p-1.5"
+          className="pointer-events-none mr-1 flex shrink-0 items-center justify-center rounded p-0.5 text-[var(--nova-tree-icon)] opacity-0 transition-opacity hover:bg-[var(--nova-hover)] hover:text-[var(--nova-text)] focus-visible:pointer-events-auto focus-visible:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100 data-[state=open]:pointer-events-auto data-[state=open]:opacity-100 max-lg:pointer-events-auto max-lg:opacity-100 max-lg:size-11 max-lg:p-0"
           onPointerDown={(e) => {
             e.stopPropagation()
           }}
