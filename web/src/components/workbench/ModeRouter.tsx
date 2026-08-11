@@ -259,9 +259,20 @@ export function ModeRouter(props: ModeRouterProps) {
   const documentReviewNavigationNonceRef = useRef(0)
   const [editorLine, setEditorLine] = useState(1)
   const sidebarSearchByWorkspaceRef = useRef(new Map<string, string>())
+  const sidebarMemoryByWorkspaceRef = useRef(new Map<string, { expandedPaths: string[]; scrollTop: number }>())
+  const [, setSidebarMemoryVersion] = useState(0)
+  const refreshSidebarMemory = useCallback(() => {
+    setSidebarMemoryVersion((version) => version + 1)
+  }, [])
   // The router is the lifecycle owner: the settings lane survives AgentPanel close/unmount.
   const composerSettings = usePersistedUserSettings({ workspace, defaults: WRITING_COMPOSER_SETTING_DEFAULTS })
   const flushComposerSettings = composerSettings.flushPending
+
+  let sidebarMemory = sidebarMemoryByWorkspaceRef.current.get(workspace)
+  if (!sidebarMemory) {
+    sidebarMemory = { expandedPaths: [], scrollTop: 0 }
+    sidebarMemoryByWorkspaceRef.current.set(workspace, sidebarMemory)
+  }
 
   const flushComposerSettingsBestEffort = useCallback(() => {
     void flushComposerSettings().then((saved) => {
@@ -546,7 +557,20 @@ export function ModeRouter(props: ModeRouterProps) {
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-2 text-xs">
+      <div
+        className="flex-1 overflow-y-auto p-2 text-xs"
+        data-project-sidebar-scroll="true"
+        data-testid="project-sidebar-scroll"
+        onScroll={(event) => {
+          sidebarMemory.scrollTop = event.currentTarget.scrollTop
+        }}
+        ref={(element) => {
+          if (element && !element.dataset.projectSidebarScrollRestored) {
+            element.dataset.projectSidebarScrollRestored = 'true'
+            element.scrollTop = sidebarMemory.scrollTop
+          }
+        }}
+      >
         {showSidebarLoading ? (
           <div className="py-4 text-center text-[var(--nova-text-muted)]">{t('router.loading')}</div>
         ) : sidebarView === 'outline' ? (
@@ -571,15 +595,24 @@ export function ModeRouter(props: ModeRouterProps) {
             }}
             onWorkspaceChanged={onWorkspaceChanged}
             initialQuery={sidebarSearchByWorkspaceRef.current.get(workspace) ?? ''}
-            onQueryChange={(query) => sidebarSearchByWorkspaceRef.current.set(workspace, query)}
+            onQueryChange={(query) => {
+              sidebarSearchByWorkspaceRef.current.set(workspace, query)
+              refreshSidebarMemory()
+            }}
           />
         ) : tree.length === 0 ? (
           <div className="py-4 text-center text-[var(--nova-text-muted)]">{t('router.noFiles')}</div>
         ) : (
           <FileTree
+            key={workspace}
             nodes={tree}
             selectedFile={selectedFile}
             onSelectFile={(path) => { void selectProjectFile(path) }}
+            defaultExpandedPaths={sidebarMemory.expandedPaths}
+            onExpandedPathsChange={(paths) => {
+              sidebarMemory.expandedPaths = paths
+              refreshSidebarMemory()
+            }}
             onReferenceFile={onReferenceFile}
             chapterStats={chapterStats}
             onCreateItem={onCreateItem}

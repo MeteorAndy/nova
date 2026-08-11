@@ -153,6 +153,66 @@ describe('Mobile Workbench', () => {
     unregisterExecutableDraft('automations')
   })
 
+  it('未保存游戏模式预设时从设置面返回会弹出继续编辑/放弃修改', async () => {
+    const user = userEvent.setup()
+    const onSetMode = vi.fn()
+    const onSetInteractiveSubmode = vi.fn()
+    const discard = vi.fn()
+    registerExecutableDraft('setting-panel', { hasPending: true, discard })
+
+    render(
+      <WorkbenchShell
+        {...workbenchProps(<div>故事正文</div>)}
+        mode="interactive"
+        booksReturnMode="interactive"
+        interactiveSubmode="teller"
+        onSetMode={onSetMode}
+        onSetInteractiveSubmode={onSetInteractiveSubmode}
+      />,
+    )
+
+    const navigation = screen.getByRole('navigation', { name: '移动端工作台导航' })
+    await user.click(within(navigation).getByRole('button', { name: '故事' }))
+
+    expect(await screen.findByRole('alertdialog', { name: '放弃未保存的配置？' })).toBeInTheDocument()
+    expect(onSetInteractiveSubmode).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: '继续编辑' }))
+    expect(onSetInteractiveSubmode).not.toHaveBeenCalled()
+
+    await user.click(within(navigation).getByRole('button', { name: '故事' }))
+    await user.click(screen.getByRole('button', { name: '放弃修改' }))
+
+    expect(discard).toHaveBeenCalled()
+    expect(onSetMode).toHaveBeenCalledWith('interactive')
+    expect(onSetInteractiveSubmode).toHaveBeenCalledWith('story')
+    unregisterExecutableDraft('setting-panel')
+  })
+
+  it('重复点击当前互动目的地不会触发未保存守卫', async () => {
+    const user = userEvent.setup()
+    const onSetInteractiveSubmode = vi.fn()
+    const discard = vi.fn()
+    registerExecutableDraft('setting-panel', { hasPending: true, discard })
+
+    render(
+      <WorkbenchShell
+        {...workbenchProps(<div>故事正文</div>)}
+        mode="interactive"
+        booksReturnMode="interactive"
+        interactiveSubmode="lore"
+        onSetInteractiveSubmode={onSetInteractiveSubmode}
+      />,
+    )
+
+    const navigation = screen.getByRole('navigation', { name: '移动端工作台导航' })
+    await user.click(within(navigation).getByRole('button', { name: '资料' }))
+
+    expect(screen.queryByRole('alertdialog', { name: '放弃未保存的配置？' })).not.toBeInTheDocument()
+    expect(discard).not.toHaveBeenCalled()
+    unregisterExecutableDraft('setting-panel')
+  })
+
   it('shows actionable tasks in More and resumes the selected source workflow', async () => {
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' })
     server.use(

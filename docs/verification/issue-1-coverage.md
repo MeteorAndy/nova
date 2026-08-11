@@ -31,7 +31,7 @@
 | 21 | Project keeps full file segments | ✅ | file tree + workspace API tests |
 | 22 | Search covers manuscript/plan/lore | ✅ | SearchPanel.test.tsx asserts one query returns and renders chapters/plans/lore results and hands result + query to selection |
 | 23 | Chapter click opens manuscript | ✅ | integration test "returns to the manuscript" |
-| 24 | Project state restoration | 🟡 | sidebar view/selection persist; global search query persisted in ModeRouter; outline expanded state and scroll remain |
+| 24 | Project state restoration | ✅ | sidebar view/selection persist; search query, FileTree expansion, and sidebar scroll restored per project by ModeRouter.mobile-project-restore.test.tsx + FileTree tests |
 | 25 | No drag during normal browse | ✅ | HomeView.test.tsx asserts no drag handle in recent mode; useSortable disabled outside manual mode |
 | 26 | Sort mode shows handles | ✅ | HomeView.test.tsx asserts drag handle appears after switching to manual sort |
 | 27 | Keyboard hides primary nav | ✅ | integration test "bottom area to the focused input" |
@@ -107,7 +107,7 @@
 | 82 | List-to-full-detail management pages | ✅ | AdaptiveSurface drawer flows asserted (Agents narrow + Skills mobile tests); kept-mounted routes |
 | 83 | Restore search/filter/scroll/selection | ✅ | MobilePaneHost keeps drawer panes mounted; adaptive-surface + SkillsView tests assert search survives close/reopen |
 | 84 | Executable config staged + validated | ✅ | settings/config-manager tests |
-| 85 | Unsaved config return protection | 🟡 | shared executable-draft-guard registry + UnsavedConfigGuardDialog wired; Automations/Skills/Agents registered; game-mode SettingPanel remains |
+| 85 | Unsaved config return protection | ✅ | shared executable-draft-guard registry + UnsavedConfigGuardDialog wired; Automations/Skills/Agents/SettingPanel registered; shell nav, activity bar, IDE panel close, and in-layout transitions guarded by integration tests |
 | 86 | Continuous draft autosave + conflict display | ✅ | useEditorDraftPersistence tests |
 | 87 | Immediate preferences autosave | ✅ | settings auto-save tests |
 | 88 | Short offline editing of open docs | ✅ | pending-drafts tests |
@@ -130,8 +130,8 @@
 
 ## Remaining gaps
 
-- 故事 24（项目工作面状态恢复）与故事 85（可执行配置返回保护）：设计文档已提交（docs/verification/mobile-workbench-state-restoration-design.md、executable-config-return-guard-design.md），等待确认后按 TDD 实现。
-- 故事 33（每会话草稿/滚动/运行状态）：输入草稿与运行状态已验证，会话滚动保留已纳入状态恢复设计，等待确认后实现。
-- 故事 101（屏幕阅读器语义）：需要读屏器人工/工具审计，当前环境无对应工具。
+- 故事 24、85 已按设计文档实现并转 ✅；设计文档保留为决策记录。
+- 故事 101：自动化语义审计已完成；真机读屏通过仍属设备级后续项。
+- 故事 33：输入草稿、滚动位置与运行状态均已完成验证并转 ✅。
 - 设备级验证：safe-area 安全区与系统通知权限流程需要真机。
 - 人工视觉审查仍不完整：Settings 已在 320px 中文深色与英文浅色下检查。

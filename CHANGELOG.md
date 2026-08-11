@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 项目工作面恢复补全（故事 24）：目录树展开状态与侧栏滚动位置按创作项目记忆，切到正文再返回“项目”后目录展开与滚动位置保持一致；搜索词恢复同时强化为可重渲染的受控记忆。
+- Project surface restoration completed (story 24): FileTree expansion and the project sidebar scroll position are remembered per project and restored after leaving and returning; the search query memory is also refreshed on each change.
+- 游戏模式设置面接入未保存草稿守卫（故事 85 完成）：叙事风格等预设存在未保存修改时，移动端底部导航、桌面活动栏以及布局内部跳转都会先弹出“继续编辑/放弃修改”，桌面 IDE 方案预设面板关闭也受同一守卫保护。
+- Game-mode setting surface now joins the unsaved draft guard (story 85 complete): with pending preset edits, mobile bottom navigation, the desktop activity bar, and in-layout transitions all show the keep-editing/discard dialog first, and closing the IDE preset panel is guarded the same way.
 - 项目工作面恢复增强（故事 24 部分）：全局搜索词按创作项目记忆，切走再返回后搜索框恢复；视图与选中文件保持原有保留行为。
 - Project surface restoration extended (story 24, partial): the global search query is remembered per project and restored after leaving and returning; view and selected file keep their existing persistence.
 - 可访问性语义审计完成（故事 101）：自动化覆盖移动外壳、更多菜单与任务中心，所有可见按钮/图片有可读名称，导航与区域有命名；真机读屏通过列为设备级后续项。

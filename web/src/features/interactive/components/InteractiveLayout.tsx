@@ -22,7 +22,9 @@ import {
 } from './story-state/display-preference'
 import { novaEase, panelPresence, subtlePresence } from '@/features/motion/motion-tokens'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import type { ImagePreset, InteractiveTurnPersistedEvent, Snapshot, StoryDirector, StoryImageSettings, StorySummary } from '../types'
+import { UnsavedConfigGuardDialog } from '@/features/config-guard/UnsavedConfigGuardDialog'
+import { discardExecutableDraft, hasPendingExecutableDraft } from '@/features/config-guard/executable-draft-guard'
+import type { ImagePreset, InteractiveSubmode, InteractiveTurnPersistedEvent, Snapshot, StoryDirector, StoryImageSettings, StorySummary } from '../types'
 import { INTERACTIVE_OPENING_PRESET_PATH, INTERACTIVE_OPENING_PRESET_UPDATED_EVENT, LEGACY_INTERACTIVE_OPENING_PRESET_PATH, parseBookOpeningPresets, type BookOpeningPreset, type StoryCreateInput } from '../opening'
 import { INTERACTIVE_STORY_RECOVERY_EVENT, consumeInteractiveStoryRecovery, type InteractiveStoryRecoveryTarget } from '@/features/mobile-workbench/task-recovery-navigation'
 
@@ -81,6 +83,15 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
     setSubmode: state.setSubmode,
     resetWorkspaceState: state.resetWorkspaceState,
   })))
+  const changeSubmode = (next: InteractiveSubmode) => {
+    const inPresetSurface = submode === 'teller' || submode === 'lore' || submode === 'creator'
+    const leavesPresetSurface = next === 'story' || next === 'timeline' || next === 'director'
+    if (inPresetSurface && leavesPresetSurface && hasPendingExecutableDraft('setting-panel')) {
+      setPendingPresetSubmode(next)
+      return
+    }
+    setSubmode(next)
+  }
   const currentStory = stories.find((story) => story.id === currentStoryId)
   const currentTeller = tellers.find((teller) => teller.id === currentStory?.story_teller_id)
   const styleSceneSuggestions = Array.from(new Set((currentTeller?.style_rules || []).map((rule) => rule.scene.trim()).filter((scene) => scene && !isGlobalStyleSceneName(scene))))
@@ -90,6 +101,7 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
   const snapshotRequestSeqRef = useRef(0)
   const storySelectionQueueRef = useRef<Promise<void>>(Promise.resolve())
   const lastStableSnapshotRef = useRef<Snapshot | null>(null)
+  const [pendingPresetSubmode, setPendingPresetSubmode] = useState<InteractiveSubmode | null>(null)
   const [snapshotLoading, setSnapshotLoading] = useState(false)
   const [snapshotLoadFailed, setSnapshotLoadFailed] = useState(false)
   const [storyStateDisplayPreference, setStoryStateDisplayPreference] = useState(readStoryStateDisplayPreference)
@@ -176,7 +188,7 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
       await switchInteractiveBranch(target.storyId, target.branchId)
       setCurrentStoryId(target.storyId)
       setCurrentBranchId(target.branchId)
-      setSubmode('story')
+      changeSubmode('story')
       await reloadSnapshot(target.branchId, target.storyId)
     } catch (error) {
       console.error('[interactive-layout] 恢复后台故事任务失败', {
@@ -343,7 +355,7 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
 
   const openDirectorState = useCallback(() => {
     if (isMobile) {
-      setSubmode('director')
+      changeSubmode('director')
       return
     }
     if (!rightPanelVisible) onToggleRightPanel?.()
@@ -387,7 +399,7 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
 
   const handleContinueBranch = async (branchId: string) => {
     await handleSwitchBranch(branchId)
-    setSubmode('story')
+    changeSubmode('story')
   }
 
   const handleRenameBranch = async (branchId: string, title: string) => {
@@ -427,9 +439,9 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
       onImageSettingsChange={handleImageSettingsChange}
       onRequestLoreInit={onRequestLoreInit}
       onOpenDirectorConfig={() => {
-        setSubmode('teller')
+        changeSubmode('teller')
       }}
-      onToggleDirectorPanel={isMobile ? () => setSubmode('director') : onToggleRightPanel}
+      onToggleDirectorPanel={isMobile ? () => changeSubmode('director') : onToggleRightPanel}
       onOpenDirectorState={openDirectorState}
       onStateDisplayPreferenceChange={handleStoryStateDisplayPreferenceChange}
       onTurnPersisted={handleTurnPersisted}
@@ -457,11 +469,11 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
                     onRenameBranch={handleRenameBranch}
                     onCreateBranch={handleCreateBranch}
                     onDeleteBranch={handleDeleteBranch}
-                    onBackToStory={() => setSubmode('story')}
+                    onBackToStory={() => changeSubmode('story')}
                     headerControls={<StoryPicker stories={stories} currentStoryId={currentStoryId} onSelect={handleStorySelect} onCreate={() => undefined} onDeleteStories={handleDeleteStories} hideCreate />}
                   />
                 ) : (
-                  <BranchTimeline snapshot={displaySnapshot} branches={branches} currentBranchId={currentBranchId} onSwitchBranch={handleSwitchBranch} onCreateBranch={handleCreateBranch} onDeleteBranch={handleDeleteBranch} fill variant="workspace" onBackToStory={() => setSubmode('story')} headerControls={<StoryPicker stories={stories} currentStoryId={currentStoryId} onSelect={handleStorySelect} onCreate={() => undefined} onDeleteStories={handleDeleteStories} hideCreate />} />
+                  <BranchTimeline snapshot={displaySnapshot} branches={branches} currentBranchId={currentBranchId} onSwitchBranch={handleSwitchBranch} onCreateBranch={handleCreateBranch} onDeleteBranch={handleDeleteBranch} fill variant="workspace" onBackToStory={() => changeSubmode('story')} headerControls={<StoryPicker stories={stories} currentStoryId={currentStoryId} onSelect={handleStorySelect} onCreate={() => undefined} onDeleteStories={handleDeleteStories} hideCreate />} />
                 )
               ) : isMobile ? (
                 storyStage
@@ -486,6 +498,20 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
           </div>
         </div>
       </div>
+      <UnsavedConfigGuardDialog
+        open={pendingPresetSubmode !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingPresetSubmode(null)
+        }}
+        onDiscard={() => {
+          const next = pendingPresetSubmode
+          setPendingPresetSubmode(null)
+          if (next) {
+            void discardExecutableDraft('setting-panel')
+            setSubmode(next)
+          }
+        }}
+      />
     </div>
   )
 }

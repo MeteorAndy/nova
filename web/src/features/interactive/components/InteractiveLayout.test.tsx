@@ -6,6 +6,7 @@ import { useInteractiveStore } from '../stores/interactive-store'
 import { createInteractiveStory, deleteInteractiveStory, getInteractiveBranches, getInteractiveSnapshot, getInteractiveStories, getInteractiveTellers, getStoryDirectors, renameInteractiveBranch, selectInteractiveStory, switchInteractiveBranch, updateInteractiveStory } from '../api'
 import type { Snapshot, StoryDirector, StorySummary, Teller } from '../types'
 import { consumeInteractiveStoryRecovery, requestInteractiveStoryRecovery } from '@/features/mobile-workbench/task-recovery-navigation'
+import { registerExecutableDraft, unregisterExecutableDraft, useExecutableDraftGuard } from '@/features/config-guard/executable-draft-guard'
 
 const responsiveState = vi.hoisted(() => ({ mobile: false }))
 
@@ -112,6 +113,7 @@ vi.mock('./StoryStage', () => ({
 }))
 
 beforeEach(() => {
+  useExecutableDraftGuard.setState({ entries: {} })
   responsiveState.mobile = false
   window.localStorage.clear()
   useInteractiveStore.setState({
@@ -435,6 +437,47 @@ describe('InteractiveLayout mobile workspaces', () => {
     })
     expect(selectInteractiveStory).toHaveBeenCalledWith('st_2')
     expect(switchInteractiveBranch).toHaveBeenCalledWith('st_2', 'night')
+  })
+
+  it('keeps the preset surface when a queued task would leave it with a pending draft', async () => {
+    const discard = vi.fn()
+    registerExecutableDraft('setting-panel', { hasPending: true, discard })
+    useInteractiveStore.setState({
+      stories: [story('st_1', '故事线 1')],
+      currentStoryId: 'st_1',
+      currentBranchId: 'main',
+      submode: 'teller',
+    })
+    vi.mocked(getInteractiveStories).mockResolvedValue({
+      current_story_id: 'st_1',
+      stories: [story('st_1', '故事线 1')],
+    })
+    vi.mocked(getInteractiveSnapshot).mockImplementation(async (storyId, branchId) => ({
+      story_id: storyId,
+      branch_id: branchId || 'main',
+      turns: [],
+      state: {},
+    }))
+    requestInteractiveStoryRecovery({ storyId: 'st_1', branchId: 'night', taskId: 'task-story' })
+
+    render(<InteractiveLayout workspace="/workspace" />)
+
+    expect(await screen.findByRole('alertdialog', { name: '放弃未保存的配置？' })).toBeInTheDocument()
+    expect(screen.getByTestId('setting-panel')).toBeInTheDocument()
+    expect(useInteractiveStore.getState().submode).toBe('teller')
+
+    fireEvent.click(screen.getByRole('button', { name: '继续编辑' }))
+    expect(useInteractiveStore.getState().submode).toBe('teller')
+
+    act(() => {
+      requestInteractiveStoryRecovery({ storyId: 'st_1', branchId: 'night', taskId: 'task-story' })
+    })
+    expect(await screen.findByRole('alertdialog', { name: '放弃未保存的配置？' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '放弃修改' }))
+    await waitFor(() => expect(useInteractiveStore.getState().submode).toBe('story'))
+    expect(discard).toHaveBeenCalled()
+    unregisterExecutableDraft('setting-panel')
   })
 })
 

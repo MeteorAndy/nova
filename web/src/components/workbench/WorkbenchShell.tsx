@@ -248,7 +248,17 @@ export function WorkbenchShell({
   }
 
   const leaveConfigSurface = (action: () => void) => {
-    const key = mode === 'skills' ? 'skills' : mode === 'agents' ? 'agents' : mode === 'automations' ? 'automations' : null
+    const key = mode === 'skills'
+      ? 'skills'
+      : mode === 'agents'
+        ? 'agents'
+        : mode === 'automations'
+          ? 'automations'
+          : mode === 'interactive' && interactiveSubmode === 'teller'
+            ? 'setting-panel'
+            : mode === 'ide' && (loreVisible || tellerVisible)
+              ? 'setting-panel'
+              : null
     if (key && !settingsOpen && hasPendingExecutableDraft(key)) {
       setPendingLeave({ key, proceed: action })
       return
@@ -273,6 +283,14 @@ export function WorkbenchShell({
   }
 
   const toggleIdePanel = (panel: NonNullable<RightPanel>) => {
+    if (rightPanel === 'teller' && panel === 'teller') {
+      leaveConfigSurface(() => {
+        closeSettingsIfOpen()
+        onSetMode('ide')
+        onSetRightPanel(null)
+      })
+      return
+    }
     closeSettingsIfOpen()
     onSetMode('ide')
     onSetRightPanel(rightPanel === panel ? null : panel)
@@ -289,6 +307,11 @@ export function WorkbenchShell({
   }
 
   const openInteractiveSubmode = (nextMode: InteractiveSubmode) => {
+    if (mode === 'interactive' && interactiveSubmode === nextMode) {
+      closeSettingsIfOpen()
+      if (versionsVisible) onSetRightPanel(null)
+      return
+    }
     leaveConfigSurface(() => {
       closeSettingsIfOpen()
       if (versionsVisible) onSetRightPanel(null)

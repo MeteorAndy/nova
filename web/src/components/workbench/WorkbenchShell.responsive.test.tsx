@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { formatDateTime, setConfiguredLocale } from '@/i18n'
 import { WorkbenchShell } from './WorkbenchShell'
+import { registerExecutableDraft, unregisterExecutableDraft, useExecutableDraftGuard } from '@/features/config-guard/executable-draft-guard'
 
 const responsiveState = vi.hoisted(() => ({ mobile: false }))
 const automationActivityApi = vi.hoisted(() => ({
@@ -27,6 +28,7 @@ vi.mock('@/lib/api', () => ({
 
 describe('WorkbenchShell responsive main content', () => {
   beforeEach(() => {
+    useExecutableDraftGuard.setState({ entries: {} })
     responsiveState.mobile = false
     localStorage.clear()
     setConfiguredLocale('zh-CN')
@@ -132,6 +134,32 @@ describe('WorkbenchShell responsive main content', () => {
     />)
 
     expect(screen.getByText(`更新：${formatDateTime(updatedAt)} · 行 54`)).toBeInTheDocument()
+  })
+
+  it('guards closing the IDE teller panel while a preset draft is pending', async () => {
+    const discard = vi.fn()
+    const onSetRightPanel = vi.fn()
+    registerExecutableDraft('setting-panel', { hasPending: true, discard })
+
+    render(
+      <WorkbenchShell
+        {...workbenchProps(<div />)}
+        mode="ide"
+        rightPanel="teller"
+        onSetRightPanel={onSetRightPanel}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '方案预设' }))
+
+    expect(await screen.findByRole('alertdialog', { name: '放弃未保存的配置？' })).toBeInTheDocument()
+    expect(onSetRightPanel).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: '放弃修改' }))
+
+    expect(discard).toHaveBeenCalled()
+    expect(onSetRightPanel).toHaveBeenCalledWith(null)
+    unregisterExecutableDraft('setting-panel')
   })
 })
 
