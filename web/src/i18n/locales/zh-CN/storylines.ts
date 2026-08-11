@@ -22,7 +22,7 @@ const storylines = {
   'storylines.renamePlaceholder': '剧情线名称',
   'storylines.renameRequired': '剧情线名称不能为空',
   'storylines.renameFailed': '重命名剧情线失败',
-  'storylines.emptyBranch': '这条剧情线还没有剧情节点。',
+  'storylines.emptyBranch': '暂无剧情节点',
   'storylines.head': '最新',
   'storylines.unknownBranch': '未知剧情线',
   'storylines.mainBranch': '主线',

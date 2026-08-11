@@ -170,4 +170,23 @@ describe('FileTree', () => {
     expect(screen.queryByText('ch01.md')).not.toBeInTheDocument()
     expect(onExpandedPathsChange).toHaveBeenLastCalledWith(expect.not.arrayContaining(['manuscripts']))
   })
+
+  it('exposes the full path as a title on truncated directory and file names', () => {
+    const nodes: FileNode[] = [
+      { name: 'manuscripts', type: 'dir', children: [{ name: 'chapters', type: 'dir', children: [{ name: 'ch01.md', type: 'file' }] }] },
+    ]
+
+    render(
+      <FileTree
+        nodes={nodes}
+        selectedFile={null}
+        onSelectFile={vi.fn()}
+        defaultExpandedPaths={['manuscripts', 'manuscripts/chapters']}
+      />,
+    )
+
+    expect(screen.getByText('manuscripts')).toHaveAttribute('title', 'manuscripts')
+    expect(screen.getByText('chapters')).toHaveAttribute('title', 'manuscripts/chapters')
+    expect(screen.getByText('ch01.md')).toHaveAttribute('title', 'manuscripts/chapters/ch01.md')
+  })
 })

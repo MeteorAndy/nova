@@ -627,7 +627,7 @@ function FileTreeNode({
                     onCancel={onInlineCancel}
                   />
                 ) : (
-                  <span className="truncate">{node.name}</span>
+                  <span className="truncate" title={path}>{node.name}</span>
                 )}
               </button>
               {!isRenaming && actions.length > 0 && <NodeDropdown actions={actions} />}
@@ -718,7 +718,7 @@ function FileTreeNode({
                 />
               ) : (
                 <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
-                  <span className="truncate">{node.name}</span>
+                  <span className="truncate" title={path}>{node.name}</span>
                   {chapter && (
                     <span className="flex shrink-0 items-center gap-1 text-[10px] text-[var(--nova-text-faint)]">
                       <span>{formatCompactWords(chapter.words)}</span>

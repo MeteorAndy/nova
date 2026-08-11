@@ -1113,7 +1113,7 @@ function PlanningListItem({
     >
       <div className={`flex min-w-0 items-center ${compact ? 'gap-1.5' : 'gap-2'}`}>
         <Icon className={`${compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} shrink-0 ${selected ? 'text-[var(--nova-text)]' : 'text-[var(--nova-text-muted)]'}`} />
-        <span className={`min-w-0 flex-1 truncate font-medium ${compact ? 'text-[11px]' : 'text-xs'}`}>{document.title}</span>
+        <span className={`min-w-0 flex-1 truncate font-medium ${compact ? 'text-[11px]' : 'text-xs'}`} title={document.title}>{document.title}</span>
       </div>
     </button>
   )
@@ -1224,7 +1224,7 @@ function ChapterOutlineItem({
     >
       <div className="flex w-full min-w-0 items-center gap-2 text-left">
         <BookOpen className={`h-3.5 w-3.5 shrink-0 ${active ? 'text-[var(--nova-text)]' : 'text-[var(--nova-text-muted)]'}`} />
-        <span className="min-w-0 flex-1 truncate text-xs font-medium">{chapter.display_title}</span>
+        <span className="min-w-0 flex-1 truncate text-xs font-medium" title={chapter.display_title}>{chapter.display_title}</span>
       </div>
       <div className="mt-1 flex items-center justify-between text-[11px] text-[var(--nova-text-faint)]">
         <span>{t('common.words', { count: formatNumber(chapter.words) })}</span>

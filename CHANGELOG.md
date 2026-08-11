@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 移动端文本溢出策略落地（ADR 0030）：剧情线页标题、开场方式标签、空状态提示等固定短词在窄屏不再被省略号截断，同排次要控件在窄屏自动收起文字；目录树文件名、章节标题、工作区路径、预设标题等长内容保留省略号并补齐完整内容提示（title）。
+- Mobile text overflow policy implemented (ADR 0030): fixed short labels such as the storylines header, opening-mode tabs, and empty-state hints are no longer clipped on narrow screens, while secondary controls collapse to icons; long user content (file names, chapter titles, workspace paths, preset titles) keeps ellipsis but now exposes the full value via title hints.
 - 项目工作面恢复补全（故事 24）：目录树展开状态与侧栏滚动位置按创作项目记忆，切到正文再返回“项目”后目录展开与滚动位置保持一致；搜索词恢复同时强化为可重渲染的受控记忆。
 - Project surface restoration completed (story 24): FileTree expansion and the project sidebar scroll position are remembered per project and restored after leaving and returning; the search query memory is also refreshed on each change.
 - 游戏模式设置面接入未保存草稿守卫（故事 85 完成）：叙事风格等预设存在未保存修改时，移动端底部导航、桌面活动栏以及布局内部跳转都会先弹出“继续编辑/放弃修改”，桌面 IDE 方案预设面板关闭也受同一守卫保护。

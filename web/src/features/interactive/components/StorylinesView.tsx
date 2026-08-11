@@ -126,7 +126,7 @@ export function StorylinesView({
         <div className="nova-topbar flex min-h-11 shrink-0 items-center gap-2 border-b px-3 py-2">
           <Button variant="ghost" size="xs" className="nova-nav-item gap-1.5" onClick={() => setShowGraph(false)}>
             <ArrowLeft className="h-4 w-4" />
-            {t('storylines.backToList')}
+            <span className="hidden sm:inline">{t('storylines.backToList')}</span>
           </Button>
           <span className="min-w-0 flex-1 truncate text-xs font-medium text-[var(--nova-text-faint)]">
             {t('storylines.graphOverview')}
@@ -161,19 +161,19 @@ export function StorylinesView({
             aria-label={t('storylines.backToList')}
           >
             <ArrowLeft className="h-4 w-4" />
-            {t('storylines.backToList')}
+            <span className="hidden sm:inline">{t('storylines.backToList')}</span>
           </Button>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-medium text-[var(--nova-text)]">{activeItem.title}</div>
-            <div className="truncate text-[11px] text-[var(--nova-text-faint)]">
+            <div className="truncate text-sm font-medium text-[var(--nova-text)]" title={activeItem.title}>{activeItem.title}</div>
+            <div className="truncate text-[11px] text-[var(--nova-text-faint)]" title={activeItem.turnCount > 0 ? t('storylines.turnCount', { count: activeItem.turnCount }) : t('storylines.emptyBranch')}>
               {activeItem.turnCount > 0
                 ? t('storylines.turnCount', { count: activeItem.turnCount })
                 : t('storylines.emptyBranch')}
             </div>
           </div>
-          <Button variant="outline" size="xs" className="nova-nav-item gap-1.5" onClick={() => setShowGraph(true)}>
+          <Button variant="outline" size="xs" className="nova-nav-item gap-1.5" onClick={() => setShowGraph(true)} aria-label={t('storylines.graphOverview')}>
             <Network className="h-4 w-4" />
-            {t('storylines.graphOverview')}
+            <span className="hidden sm:inline">{t('storylines.graphOverview')}</span>
           </Button>
           <Button
             variant="ghost"
@@ -220,7 +220,7 @@ export function StorylinesView({
                 <li key={node.id} className="rounded-[var(--nova-radius)] border border-[var(--nova-border)] bg-[var(--nova-surface)] p-3">
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-medium text-[var(--nova-text-faint)]">{index + 1}</span>
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--nova-text)]">{node.title}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--nova-text)]" title={node.title}>{node.title}</span>
                     {node.current && <Badge variant="outline" className="border-[var(--nova-accent)]/35 bg-[var(--nova-accent)]/10 text-[var(--nova-accent)]">{t('storylines.current')}</Badge>}
                     {node.head && <Badge variant="outline" className="border-[var(--nova-border)] bg-[var(--nova-surface)] text-[var(--nova-text-muted)]">{t('storylines.head')}</Badge>}
                     {node.terminal && <Badge variant="outline" className="border-[var(--nova-danger-border)] bg-[var(--nova-danger-bg)] text-[var(--nova-danger)]">{t('branchTimeline.terminalBadge')}</Badge>}
@@ -238,12 +238,12 @@ export function StorylinesView({
       <header className="nova-topbar flex min-h-12 shrink-0 items-center gap-2 border-b px-3 py-2">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <GitBranch className="h-4 w-4 shrink-0 text-[var(--nova-accent-blue)]" />
-          <span className="truncate text-sm font-medium text-[var(--nova-text)]">{t('storylines.title')}</span>
+          <span className="shrink-0 truncate text-sm font-medium text-[var(--nova-text)]" title={t('storylines.title')}>{t('storylines.title')}</span>
           {headerControls}
         </div>
-        <Button variant="outline" size="xs" className="nova-nav-item gap-1.5" onClick={() => setShowGraph(true)}>
+        <Button variant="outline" size="xs" className="nova-nav-item gap-1.5" onClick={() => setShowGraph(true)} aria-label={t('storylines.graphOverview')}>
           <Network className="h-4 w-4" />
-          {t('storylines.graphOverview')}
+          <span className="hidden sm:inline">{t('storylines.graphOverview')}</span>
         </Button>
       </header>
       <div className="min-h-0 flex-1 overflow-y-auto p-3" data-testid="storylines-branch-list">
@@ -260,7 +260,7 @@ export function StorylinesView({
                   aria-label={t('storylines.openBranch', { title: item.title })}
                 >
                   <span className="flex min-w-0 items-center gap-2">
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--nova-text)]">{item.title}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--nova-text)]" title={item.title}>{item.title}</span>
                     {item.current && <Badge variant="outline" className="shrink-0 border-[var(--nova-accent)]/35 bg-[var(--nova-accent)]/10 text-[var(--nova-accent)]">{t('storylines.current')}</Badge>}
                     <Badge variant="outline" className="shrink-0 border-[var(--nova-border)] bg-[var(--nova-surface-2)] text-[var(--nova-text-muted)]">{t('storylines.turnCount', { count: item.turnCount })}</Badge>
                   </span>

@@ -77,6 +77,18 @@ describe('StorylinesView（移动端剧情线列表优先）', () => {
     expect(within(branchEntry).getByText(/更新于/)).toBeInTheDocument()
   })
 
+  it('列表标题与详情标题保留完整内容提示，关系总览按钮有可访问名称', async () => {
+    const user = userEvent.setup()
+    renderStorylines()
+
+    expect(screen.getByText('剧情线')).toHaveAttribute('title', '剧情线')
+    expect(screen.getByRole('button', { name: '关系总览' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '打开剧情线 折返路线' }))
+    expect(screen.getByText('折返路线')).toHaveAttribute('title', '折返路线')
+    expect(screen.getByText('2 个回合')).toHaveAttribute('title', '2 个回合')
+  })
+
   it('打开分支详情后展示纵向时间线，并支持继续游玩', async () => {
     const user = userEvent.setup()
     const { onContinueBranch } = renderStorylines()

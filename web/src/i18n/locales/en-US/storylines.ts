@@ -22,7 +22,7 @@ const storylines = {
   'storylines.renamePlaceholder': 'Storyline name',
   'storylines.renameRequired': 'Storyline name cannot be empty',
   'storylines.renameFailed': 'Failed to rename storyline',
-  'storylines.emptyBranch': 'This storyline has no story nodes yet.',
+  'storylines.emptyBranch': 'No story nodes yet',
   'storylines.head': 'HEAD',
   'storylines.unknownBranch': 'Unknown storyline',
   'storylines.mainBranch': 'Main',
