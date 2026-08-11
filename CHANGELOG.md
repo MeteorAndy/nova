@@ -69,6 +69,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- 修复 InputArea 集成测试在负载下因异步重渲染导致的文本竞争：发送前先等待输入框内容稳定，避免偶发把旧快照与最新文本混在一起断言。
+- Fixed an InputArea integration test race where async re-renders could change the composer text between snapshot and send; the test now waits for the input to stabilize before submitting.
 - 任务中心现在为每次小说导入保留稳定且独立的任务记录：完成前后复用同一执行 ID 和恢复 ID，连续导入不再覆盖较早任务，失败导入保留来源项目，应用关闭时会停止仍在运行的导入。
 - The Task Center now keeps a stable, independent record for every novel import: running and completed states share the same execution and recovery IDs, consecutive imports no longer replace earlier tasks, failed imports retain their source project, and app shutdown stops imports still in progress.
 

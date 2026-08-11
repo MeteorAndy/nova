@@ -192,10 +192,11 @@ describe('InputArea command menu', () => {
     await user.type(screen.getByRole('textbox'), 'keep pace')
     const submittedText = screen.getByRole('textbox').textContent || ''
     expect(submittedText).not.toBe('')
+    await waitFor(() => expect(screen.getByRole('textbox')).toHaveTextContent(submittedText))
     await user.click(screen.getByRole('button', { name: '发送' }))
 
     expect(handleSend).toHaveBeenCalledWith(submittedText)
-    await waitFor(() => expect(screen.getByRole('textbox')).toHaveTextContent(submittedText))
+    expect(screen.getByRole('textbox')).toHaveTextContent(submittedText)
   })
 
   it('submits selected review feedback only once while the request is being accepted', async () => {
