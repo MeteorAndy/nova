@@ -1,10 +1,12 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, GitBranch, Network, Play, Trash2 } from 'lucide-react'
+import { ArrowLeft, GitBranch, Network, Pencil, Play, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { formatDateTime } from '@/i18n'
 import type { BranchSummary, PlotNode, Snapshot } from '../types'
 import { BranchTimeline } from './BranchTimeline'
@@ -15,6 +17,7 @@ interface StorylinesViewProps {
   currentBranchId: string
   onSwitchBranch: (branchId: string) => void | Promise<void>
   onContinueBranch: (branchId: string) => void | Promise<void>
+  onRenameBranch: (branchId: string, title: string) => void | Promise<void>
   onCreateBranch: (turnId: string, title: string) => void | Promise<void>
   onDeleteBranch: (branchId: string) => void | Promise<void>
   onBackToStory: () => void
@@ -39,6 +42,7 @@ export function StorylinesView({
   currentBranchId,
   onSwitchBranch,
   onContinueBranch,
+  onRenameBranch,
   onCreateBranch,
   onDeleteBranch,
   onBackToStory,
@@ -48,6 +52,9 @@ export function StorylinesView({
   const [activeBranchId, setActiveBranchId] = useState<string | null>(null)
   const [showGraph, setShowGraph] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<BranchSummary | null>(null)
+  const [renameTarget, setRenameTarget] = useState<{ branchId: string; title: string } | null>(null)
+  const [renaming, setRenaming] = useState(false)
+  const [renameError, setRenameError] = useState('')
 
   const graphNodes = useMemo(() => snapshot?.graph?.nodes || [], [snapshot])
   const graphBranches = useMemo(() => {
@@ -84,6 +91,32 @@ export function StorylinesView({
       console.error('[StorylinesView.tsx] 删除剧情线失败', { branchId: deleteTarget.id, error })
       toast.error(t('storylines.deleteFailed'))
       setDeleteTarget(null)
+    }
+  }
+
+  const openRenameDialog = () => {
+    if (!activeItem) return
+    setRenameTarget({ branchId: activeItem.branch.id, title: activeItem.title })
+    setRenameError('')
+  }
+
+  const submitRename = async () => {
+    if (!renameTarget || renaming) return
+    const title = renameTarget.title.trim()
+    if (!title) {
+      setRenameError(t('storylines.renameRequired'))
+      return
+    }
+    setRenaming(true)
+    setRenameError('')
+    try {
+      await onRenameBranch(renameTarget.branchId, title)
+      setRenameTarget(null)
+    } catch (error) {
+      console.error('[StorylinesView.tsx] 重命名剧情线失败', { branchId: renameTarget.branchId, error })
+      setRenameError(error instanceof Error ? error.message : t('storylines.renameFailed'))
+    } finally {
+      setRenaming(false)
     }
   }
 
@@ -150,6 +183,15 @@ export function StorylinesView({
             aria-label={t('storylines.deleteBranch', { name: activeItem.title })}
           >
             <Trash2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
+            className="nova-nav-item gap-1.5"
+            onClick={openRenameDialog}
+            aria-label={t('storylines.renameBranch', { name: activeItem.title })}
+          >
+            <Pencil className="h-4 w-4" />
           </Button>
         </header>
 
@@ -253,6 +295,34 @@ export function StorylinesView({
         tone="danger"
         onConfirm={() => void confirmDelete()}
       />
+      <Dialog
+        open={Boolean(renameTarget)}
+        onOpenChange={(open) => {
+          if (!open && !renaming) setRenameTarget(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('storylines.renameDialogTitle')}</DialogTitle>
+            <DialogDescription>{renameTarget ? t('storylines.renameDialogDescription', { name: renameTarget.title }) : ''}</DialogDescription>
+          </DialogHeader>
+          <Input
+            className="nova-field text-sm"
+            value={renameTarget?.title ?? ''}
+            onChange={(event) => setRenameTarget((current) => current ? { ...current, title: event.target.value } : current)}
+            placeholder={t('storylines.renamePlaceholder')}
+            aria-label={t('storylines.renamePlaceholder')}
+          />
+          {renameError && <div className="rounded-[var(--nova-radius)] border border-[var(--nova-danger-border)] bg-[var(--nova-danger-bg)] p-2 text-xs text-[var(--nova-danger)]">{renameError}</div>}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setRenameTarget(null)} disabled={renaming}>{t('common.cancel')}</Button>
+            <Button className="gap-1.5 border border-[var(--nova-border)] bg-[var(--nova-active)] text-[var(--nova-text)] hover:bg-[var(--nova-hover)]" onClick={() => void submitRename()} disabled={renaming || !renameTarget?.title.trim()}>
+              <Pencil className="h-4 w-4" />
+              {renaming ? t('common.saving') : t('common.save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

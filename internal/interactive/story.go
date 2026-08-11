@@ -1230,6 +1230,43 @@ func (s *Store) SwitchBranch(storyID, branchID string) error {
 	return s.rewriteStoryLocked(storyID, meta, lines)
 }
 
+func (s *Store) RenameBranch(storyID, branchID, title string) (BranchSummary, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	branchID = strings.TrimSpace(branchID)
+	title = strings.TrimSpace(title)
+	if branchID == "" {
+		return BranchSummary{}, fmt.Errorf("分支不能为空")
+	}
+	if title == "" {
+		return BranchSummary{}, fmt.Errorf("分支名称不能为空")
+	}
+	meta, lines, err := s.readStoryLocked(storyID)
+	if err != nil {
+		return BranchSummary{}, err
+	}
+	branch, ok := meta.Branches[branchID]
+	if !ok {
+		return BranchSummary{}, fmt.Errorf("分支不存在: %s", branchID)
+	}
+	branch.Title = title
+	meta.Branches[branchID] = branch
+	meta.UpdatedAt = time.Now().UTC().Format(time.RFC3339Nano)
+	if err := s.rewriteStoryLocked(storyID, meta, lines); err != nil {
+		return BranchSummary{}, err
+	}
+	return BranchSummary{
+		ID:        branchID,
+		Head:      branch.Head,
+		From:      branch.From,
+		FromEvent: branch.FromEvent,
+		Title:     title,
+		CreatedAt: branch.CreatedAt,
+		Current:   meta.CurrentBranch == branchID,
+	}, nil
+}
+
 func (s *Store) DeleteBranch(storyID, branchID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

@@ -3,7 +3,7 @@ import { Profiler } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { InteractiveLayout } from './InteractiveLayout'
 import { useInteractiveStore } from '../stores/interactive-store'
-import { createInteractiveStory, deleteInteractiveStory, getInteractiveBranches, getInteractiveSnapshot, getInteractiveStories, getInteractiveTellers, getStoryDirectors, selectInteractiveStory, switchInteractiveBranch, updateInteractiveStory } from '../api'
+import { createInteractiveStory, deleteInteractiveStory, getInteractiveBranches, getInteractiveSnapshot, getInteractiveStories, getInteractiveTellers, getStoryDirectors, renameInteractiveBranch, selectInteractiveStory, switchInteractiveBranch, updateInteractiveStory } from '../api'
 import type { Snapshot, StoryDirector, StorySummary, Teller } from '../types'
 import { consumeInteractiveStoryRecovery, requestInteractiveStoryRecovery } from '@/features/mobile-workbench/task-recovery-navigation'
 
@@ -26,6 +26,7 @@ vi.mock('../api', () => ({
   getInteractiveSnapshot: vi.fn(),
   getInteractiveStories: vi.fn(),
   getInteractiveTellers: vi.fn(),
+  renameInteractiveBranch: vi.fn(),
   getStoryDirectors: vi.fn(),
   selectInteractiveStory: vi.fn(),
   switchInteractiveBranch: vi.fn(),
@@ -37,8 +38,12 @@ vi.mock('./BranchTimeline', () => ({
 }))
 
 vi.mock('./StorylinesView', () => ({
-  StorylinesView: (props: { currentBranchId: string; branches: unknown[] }) => (
-    <div data-testid="storylines-view" data-branch-id={props.currentBranchId} data-branch-count={props.branches.length} />
+  StorylinesView: (props: { currentBranchId: string; branches: unknown[]; onRenameBranch: (branchId: string, title: string) => void }) => (
+    <div data-testid="storylines-view" data-branch-id={props.currentBranchId} data-branch-count={props.branches.length}>
+      <button type="button" onClick={() => props.onRenameBranch('br_1', '密林小径')}>
+        mock rename branch
+      </button>
+    </div>
   ),
 }))
 
@@ -124,6 +129,7 @@ beforeEach(() => {
   vi.mocked(deleteInteractiveStory).mockReset()
   vi.mocked(getInteractiveStories).mockReset()
   vi.mocked(getInteractiveTellers).mockReset()
+  vi.mocked(renameInteractiveBranch).mockReset()
   vi.mocked(getStoryDirectors).mockReset()
   vi.mocked(selectInteractiveStory).mockReset()
   vi.mocked(switchInteractiveBranch).mockReset()
@@ -132,6 +138,7 @@ beforeEach(() => {
   vi.mocked(updateInteractiveStory).mockReset()
   vi.mocked(deleteInteractiveStory).mockResolvedValue(undefined)
   vi.mocked(getInteractiveTellers).mockResolvedValue([])
+  vi.mocked(renameInteractiveBranch).mockResolvedValue({ id: 'br_1', head: '', title: '密林小径', created_at: '2026-08-01T00:00:00Z', current: false })
   vi.mocked(getStoryDirectors).mockResolvedValue([])
   vi.mocked(selectInteractiveStory).mockResolvedValue(undefined)
   vi.mocked(switchInteractiveBranch).mockResolvedValue(undefined)
@@ -357,6 +364,37 @@ describe('InteractiveLayout mobile workspaces', () => {
 
     await waitFor(() => expect(screen.getByTestId('branch-timeline')).toBeInTheDocument())
     expect(screen.queryByTestId('storylines-view')).not.toBeInTheDocument()
+  })
+
+  it('renames a branch from the mobile storylines surface and refreshes the branch list', async () => {
+    responsiveState.mobile = true
+    useInteractiveStore.setState({
+      stories: [story('st_1', '故事线')],
+      currentStoryId: 'st_1',
+      currentBranchId: 'main',
+      submode: 'timeline',
+      branches: [
+        { id: 'main', head: '', title: '主线', created_at: '2026-08-01T00:00:00Z', current: true },
+        { id: 'br_1', head: '', title: '折返路线', created_at: '2026-08-01T00:00:00Z', current: false },
+      ],
+      snapshot: { story_id: 'st_1', branch_id: 'main', turns: [], state: {} },
+    })
+    vi.mocked(getInteractiveStories).mockResolvedValue({
+      current_story_id: 'st_1',
+      stories: [story('st_1', '故事线')],
+    })
+
+    render(<InteractiveLayout workspace="/workspace" />)
+
+    await waitFor(() => expect(screen.getByTestId('storylines-view')).toBeInTheDocument())
+    const callsBeforeRename = vi.mocked(getInteractiveBranches).mock.calls.length
+
+    fireEvent.click(screen.getByRole('button', { name: 'mock rename branch' }))
+
+    await waitFor(() => {
+      expect(renameInteractiveBranch).toHaveBeenCalledWith('st_1', 'br_1', '密林小径')
+      expect(vi.mocked(getInteractiveBranches).mock.calls.length).toBeGreaterThan(callsBeforeRename)
+    })
   })
 
   it('opens the director as a full workspace without an edge-swipe drawer host', async () => {

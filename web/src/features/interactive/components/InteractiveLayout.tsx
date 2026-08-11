@@ -6,7 +6,7 @@ import { Group, Panel, Separator } from 'react-resizable-panels'
 import type { Layout } from 'react-resizable-panels'
 import { useShallow } from 'zustand/react/shallow'
 import { readFile } from '@/lib/api'
-import { createInteractiveBranch, createInteractiveStory, deleteInteractiveBranch, deleteInteractiveStory, getInteractiveBranches, getInteractiveSnapshot, getInteractiveStories, getInteractiveTellers, getStoryDirectors, selectInteractiveStory, switchInteractiveBranch, updateInteractiveStory } from '../api'
+import { createInteractiveBranch, createInteractiveStory, deleteInteractiveBranch, deleteInteractiveStory, getInteractiveBranches, getInteractiveSnapshot, getInteractiveStories, getInteractiveTellers, getStoryDirectors, renameInteractiveBranch, selectInteractiveStory, switchInteractiveBranch, updateInteractiveStory } from '../api'
 import { useInteractiveStore } from '../stores/interactive-store'
 import { BranchTimeline } from './BranchTimeline'
 import { DirectorBackstage } from './director-backstage/DirectorBackstage'
@@ -390,6 +390,12 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
     setSubmode('story')
   }
 
+  const handleRenameBranch = async (branchId: string, title: string) => {
+    if (!currentStoryId) return
+    await renameInteractiveBranch(currentStoryId, branchId, title)
+    await reloadSnapshot()
+  }
+
   const settingMode: SettingPanelMode = submode === 'story' || submode === 'timeline' || submode === 'director' ? 'lore' : submode
   const settingsWorkspaceVisible = submode !== 'story' && submode !== 'timeline' && submode !== 'director'
   const contentKey = settingsWorkspaceVisible ? `settings:${settingMode}` : submode
@@ -448,6 +454,7 @@ export function InteractiveLayout({ workspace, active = true, imagePresets = [],
                     currentBranchId={currentBranchId}
                     onSwitchBranch={handleSwitchBranch}
                     onContinueBranch={handleContinueBranch}
+                    onRenameBranch={handleRenameBranch}
                     onCreateBranch={handleCreateBranch}
                     onDeleteBranch={handleDeleteBranch}
                     onBackToStory={() => setSubmode('story')}

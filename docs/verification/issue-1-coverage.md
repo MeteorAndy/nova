@@ -93,7 +93,7 @@
 | 73 | Original branch preserved | ✅ | branch history tests |
 | 74 | Storylines list-first on phone | ✅ | StorylinesView rendered for mobile timeline in InteractiveLayout.test.tsx; list-first tests in StorylinesView.test.tsx |
 | 75 | Branch item shows divergence/summary/count/time | ✅ | StorylinesView.test.tsx asserts current-first order, divergence, parent, latest summary, turn count, updated time |
-| 76 | Branch detail timeline operations | 🟡 | StorylinesView.test.tsx asserts vertical timeline, continue, switch, delete; rename remains a backend gap |
+| 76 | Branch detail timeline operations | ✅ | StorylinesView.test.tsx asserts timeline, continue, switch, delete, rename; handler_interactive_branch_rename_test.go + InteractiveLayout.test.tsx cover API and wiring |
 | 77 | Relation graph secondary on wide | ✅ | mobile graph-overview toggle in StorylinesView.test.tsx; desktop timeline keeps BranchTimeline in InteractiveLayout.test.tsx |
 | 78 | Reference separates state and lore | ✅ | story-state model tests |
 | 79 | Current state read-only by default | ✅ | state display tests |

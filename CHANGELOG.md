@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 剧情线分支支持重命名：移动端详情可打开重命名对话框，保存后分支列表与关系图立即显示新名称；新增 `PATCH /api/interactive/stories/:id/branches/:branch` 接口。
+- Storyline branches now support renaming: the mobile detail view opens a rename dialog, and the branch list plus relation graph show the new name immediately; added the `PATCH /api/interactive/stories/:id/branches/:branch` endpoint.
 - 移动端“剧情线”改为列表优先界面：当前分支置顶，展示名称、分歧回合、父分支、最新摘要、回合数与更新时间；点击进入纵向时间线详情，可继续游玩、切换或删除；关系总览作为次级入口保留，宽屏仍直接使用图形视图。
 - Mobile Storylines now default to a list-first interface: the current branch stays on top with name, divergence turn, parent branch, latest summary, turn count, and update time; tapping opens a vertical timeline detail with continue, switch, and delete actions; the relation overview remains a secondary entry and desktop keeps the graph as the timeline view.
 - 应用级集成测试覆盖断线时的项目切换保护：无未保存草稿时切换请求失败并显示“切换书籍失败”，有未保存草稿时先保存失败并阻止切换请求。

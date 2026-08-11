@@ -297,6 +297,20 @@ func (h *Handlers) HandleInteractiveBranchDelete(ctx context.Context, c *app.Req
 	writeJSON(c, consts.StatusOK, map[string]string{"status": "ok"})
 }
 
+func (h *Handlers) HandleInteractiveBranchRename(ctx context.Context, c *app.RequestContext) {
+	var body interactive.RenameBranchRequest
+	if err := c.BindJSON(&body); err != nil {
+		writeErrorKey(c, consts.StatusBadRequest, "api.common.invalidRequestWithDetail", "detail", err.Error())
+		return
+	}
+	branch, err := h.app.RenameInteractiveBranch(c.Param("id"), c.Param("branch"), body.Title)
+	if err != nil {
+		writeError(c, consts.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(c, consts.StatusOK, branch)
+}
+
 func (h *Handlers) HandleInteractiveBranchSwitch(ctx context.Context, c *app.RequestContext) {
 	var body struct {
 		BranchID string `json:"branch_id"`

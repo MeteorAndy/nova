@@ -315,6 +315,14 @@ export function createInteractiveBranch(storyId: string, input: { parent_event_i
   })
 }
 
+export function renameInteractiveBranch(storyId: string, branchId: string, title: string): Promise<BranchSummary> {
+  return requestJSON(`/api/interactive/stories/${encodeURIComponent(storyId)}/branches/${encodeURIComponent(branchId)}`, {
+    method: 'PATCH',
+    headers: jsonHeaders,
+    body: JSON.stringify({ title }),
+  })
+}
+
 export function deleteInteractiveBranch(storyId: string, branchId: string): Promise<void> {
   return requestJSON(`/api/interactive/stories/${encodeURIComponent(storyId)}/branches/${encodeURIComponent(branchId)}`, { method: 'DELETE' })
 }

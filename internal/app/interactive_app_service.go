@@ -539,6 +539,18 @@ func (s *InteractiveAppService) DeleteInteractiveBranch(storyID, branchID string
 	return store.DeleteBranch(storyID, branchID)
 }
 
+func (a *App) RenameInteractiveBranch(storyID, branchID, title string) (interactive.BranchSummary, error) {
+	return a.interactiveService().RenameInteractiveBranch(storyID, branchID, title)
+}
+
+func (s *InteractiveAppService) RenameInteractiveBranch(storyID, branchID, title string) (interactive.BranchSummary, error) {
+	store := s.store()
+	if store == nil {
+		return interactive.BranchSummary{}, ErrNoWorkspace
+	}
+	return store.RenameBranch(storyID, branchID, title)
+}
+
 func (a *App) InteractiveBranches(storyID string) ([]interactive.BranchSummary, error) {
 	return a.interactiveService().InteractiveBranches(storyID)
 }

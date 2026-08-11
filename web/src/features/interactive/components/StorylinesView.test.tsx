@@ -29,6 +29,7 @@ function storylineSnapshot(): Snapshot {
 function renderStorylines(overrides: Partial<Parameters<typeof StorylinesView>[0]> = {}) {
   const onSwitchBranch = vi.fn()
   const onContinueBranch = vi.fn()
+  const onRenameBranch = vi.fn()
   const onCreateBranch = vi.fn()
   const onDeleteBranch = vi.fn()
   const onBackToStory = vi.fn()
@@ -42,13 +43,14 @@ function renderStorylines(overrides: Partial<Parameters<typeof StorylinesView>[0
       currentBranchId="main"
       onSwitchBranch={onSwitchBranch}
       onContinueBranch={onContinueBranch}
+      onRenameBranch={onRenameBranch}
       onCreateBranch={onCreateBranch}
       onDeleteBranch={onDeleteBranch}
       onBackToStory={onBackToStory}
       {...overrides}
     />,
   )
-  return { onSwitchBranch, onContinueBranch, onCreateBranch, onDeleteBranch, onBackToStory }
+  return { onSwitchBranch, onContinueBranch, onRenameBranch, onCreateBranch, onDeleteBranch, onBackToStory }
 }
 
 describe('StorylinesView（移动端剧情线列表优先）', () => {
@@ -120,6 +122,23 @@ describe('StorylinesView（移动端剧情线列表优先）', () => {
 
     await user.click(screen.getByRole('button', { name: '删除' }))
     expect(onDeleteBranch).toHaveBeenCalledWith('br_1')
+  })
+
+  it('重命名分支时调用重命名回调并保存新名称', async () => {
+    const user = userEvent.setup()
+    const { onRenameBranch } = renderStorylines()
+
+    await user.click(screen.getByRole('button', { name: '打开剧情线 折返路线' }))
+    await user.click(screen.getByRole('button', { name: '重命名剧情线 折返路线' }))
+
+    const input = screen.getByRole('textbox', { name: '剧情线名称' })
+    expect(input).toHaveValue('折返路线')
+    await user.clear(input)
+    await user.type(input, '密林小径')
+    await user.click(screen.getByRole('button', { name: '保存' }))
+
+    expect(onRenameBranch).toHaveBeenCalledWith('br_1', '密林小径')
+    expect(screen.queryByRole('textbox', { name: '剧情线名称' })).not.toBeInTheDocument()
   })
 
   it('关系总览进入图形视图，并可返回列表', async () => {

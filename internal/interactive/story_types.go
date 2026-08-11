@@ -150,6 +150,10 @@ type CreateBranchRequest struct {
 	Title         string `json:"title"`
 }
 
+type RenameBranchRequest struct {
+	Title string `json:"title"`
+}
+
 type Index struct {
 	CurrentStoryID string         `json:"current_story_id"`
 	Stories        []StorySummary `json:"stories"`
