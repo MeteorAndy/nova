@@ -22,6 +22,7 @@ import { chatMessagesToAgentUIMessages } from '@/lib/agent-legacy-message'
 import { agentSubAgentSessionKey, agentViewToRenderMessage, type AgentMessageView } from '@/lib/agent-message-view'
 import { fetchSettings } from '@/features/settings/api'
 import { useSkillCommands } from '@/hooks/useSkillCommands'
+import { useOnlineStatus } from '@/hooks/use-online-status'
 import { abortInteractiveChat, analyzeInteractiveContext, compactInteractiveContext, generateInteractiveImage, removeInteractiveContextCompaction, runInteractiveDirector, sendInteractiveMessage, streamActiveInteractiveChat, switchInteractiveTurnVersion, updateInteractiveTurnNarrative } from '../api'
 import type { ActiveInteractiveChat } from '../api'
 import { createInteractiveNarrativeFilter, sanitizeStoredNarrative } from '../stream-parser'
@@ -100,6 +101,7 @@ type InteractiveStreamOutcome = {
 export function StoryStage({ workspace, styleSceneSuggestions = [], stories = [], story, tellers = [], storyDirectors = [], imagePresets = [], storyId, branchId, snapshot, snapshotLoading = false, loreEmpty = false, bookOpeningPresets = [], directorPanelVisible = true, stateDisplayPreference = DEFAULT_STORY_STATE_DISPLAY, onStorySelect = noop, onStoryCreate = noop, onStorySetupUpdate = noop, onStoryDelete = noop, onCreateBranch = noop, onDirectorChange = noop, onReplyTargetCharsChange, onImageSettingsChange, onRequestLoreInit, onOpenDirectorConfig, onToggleDirectorPanel, onOpenDirectorState, onStateDisplayPreferenceChange = noopStateDisplayPreferenceChange, onTurnPersisted = noopTurnPersisted, onDone }: StoryStageProps) {
   const { t } = useTranslation()
   const isMobile = useIsMobile()
+  const online = useOnlineStatus()
   const keyboardInset = useKeyboardInset()
   const storyStateModel = useMemo(() => buildStoryStateModel(snapshot), [snapshot])
   const [input, setInput] = useState('')
@@ -609,7 +611,7 @@ export function StoryStage({ workspace, styleSceneSuggestions = [], stories = []
   const send = async (override?: { message?: string; rewindTurnId?: string }) => {
     const sourceMessage = override?.message ?? input
     const message = sourceMessage.trim()
-    if (!message || !storyId || streaming || branchTerminal || directorBlocking) return
+    if (!message || !storyId || streaming || branchTerminal || directorBlocking || !online) return
     if (message === '/compact') {
       await compactCurrentContext()
       return
@@ -1600,11 +1602,12 @@ export function StoryStage({ workspace, styleSceneSuggestions = [], stories = []
               submitControl={
                 <Button
                   className={`nova-agent-composer-submit h-9 w-9 shrink-0 rounded-[10px] px-0 text-[var(--nova-text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${streaming ? 'bg-[var(--nova-danger-bg)] hover:bg-[var(--nova-danger-bg)]' : 'bg-[var(--nova-active)] hover:bg-[var(--nova-hover)]'}`}
-                  disabled={streaming ? false : !storyId || branchTerminal || directorBlocking || !input.trim()}
+                  disabled={streaming ? false : !online || !storyId || branchTerminal || directorBlocking || !input.trim()}
                   onClick={() => {
                     streaming ? stop() : void send()
                   }}
-                  aria-label={streaming ? t('chat.input.stop') : editingTurn ? t('storyStage.sendRegenerate') : t('chat.input.send')}
+                  aria-label={streaming ? t('chat.input.stop') : !online ? t('chat.input.offlineDisabled') : editingTurn ? t('storyStage.sendRegenerate') : t('chat.input.send')}
+                  title={!online ? t('chat.input.offlineDisabled') : undefined}
                 >
                   {streaming ? <Square className="h-3.5 w-3.5 fill-current" /> : editingTurn ? <RefreshCw className="h-3.5 w-3.5" /> : <Send className="h-3.5 w-3.5" />}
                 </Button>

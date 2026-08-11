@@ -99,6 +99,34 @@ describe('StoryStage TurnResult choices', () => {
 		expect(modelSelector.compareDocumentPosition(sendAction)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
 	})
 
+	it('离线时禁用故事舞台提交并在恢复后重新可用', async () => {
+		Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+		const user = userEvent.setup()
+		render(
+			<VirtuosoMockContext.Provider value={{ viewportHeight: 1200, itemHeight: 120 }}>
+				<StoryStage
+					workspace="/tmp/book"
+					stories={[story()]}
+					story={story()}
+					tellers={[]}
+					storyId="story-1"
+					branchId="main"
+					snapshot={{ story_id: 'story-1', branch_id: 'main', turns: [], state: {} }}
+					onDone={() => undefined}
+				/>
+			</VirtuosoMockContext.Provider>,
+		)
+
+		await user.type(screen.getByRole('textbox'), '向前走')
+		const send = screen.getByRole('button', { name: '离线时不能发送，恢复连接后重试' })
+		expect(send).toBeDisabled()
+
+		Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+		act(() => window.dispatchEvent(new Event('online')))
+
+		expect(screen.getByRole('button', { name: '发送' })).toBeEnabled()
+	})
+
 	it('shows persisted TurnResult choices directly and fills the composer without sending', async () => {
 		const user = userEvent.setup()
 		const turn = {
