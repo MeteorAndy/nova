@@ -7,6 +7,7 @@ import { setConfiguredLocale } from '@/i18n'
 import type { InteractiveSubmode } from '@/features/interactive/types'
 import { server } from '@/test/msw/server'
 import { WorkbenchShell } from './WorkbenchShell'
+import { registerExecutableDraft, unregisterExecutableDraft, useExecutableDraftGuard } from '@/features/config-guard/executable-draft-guard'
 
 const responsiveState = vi.hoisted(() => ({ mobile: true, phone: true }))
 const automationNavigation = vi.hoisted(() => ({ request: vi.fn() }))
@@ -21,6 +22,7 @@ vi.mock('@/features/automations/automation-navigation', () => ({
 
 describe('Mobile Workbench', () => {
   beforeEach(() => {
+    useExecutableDraftGuard.setState({ entries: {} })
     responsiveState.mobile = true
     responsiveState.phone = true
     localStorage.clear()
@@ -98,6 +100,38 @@ describe('Mobile Workbench', () => {
     for (const img of document.querySelectorAll('img')) {
       expect(img).toHaveAccessibleName()
     }
+  })
+
+  it('未保存自动化配置时返回会弹出继续编辑/放弃修改', async () => {
+    const user = userEvent.setup()
+    const onSetMode = vi.fn()
+    const discard = vi.fn()
+    registerExecutableDraft('automations', { hasPending: true, discard })
+
+    render(
+      <WorkbenchShell
+        {...workbenchProps(<div>正文内容</div>)}
+        mode="automations"
+        booksReturnMode="ide"
+        onSetMode={onSetMode}
+      />,
+    )
+
+    const navigation = screen.getByRole('navigation', { name: '移动端工作台导航' })
+    await user.click(within(navigation).getByRole('button', { name: '正文' }))
+
+    expect(await screen.findByRole('alertdialog', { name: '放弃未保存的配置？' })).toBeInTheDocument()
+    expect(onSetMode).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: '继续编辑' }))
+    expect(onSetMode).not.toHaveBeenCalled()
+
+    await user.click(within(navigation).getByRole('button', { name: '正文' }))
+    await user.click(screen.getByRole('button', { name: '放弃修改' }))
+
+    expect(discard).toHaveBeenCalled()
+    expect(onSetMode).toHaveBeenCalledWith('ide')
+    unregisterExecutableDraft('automations')
   })
 
   it('shows actionable tasks in More and resumes the selected source workflow', async () => {

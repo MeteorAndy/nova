@@ -1,4 +1,5 @@
 import common from './en-US/common'
+import configGuard from './en-US/configGuard'
 import remoteAccess from './en-US/remoteAccess'
 import configManager from './en-US/configManager'
 import chat from './en-US/chat'
@@ -41,6 +42,7 @@ import changes from './en-US/changes'
 
 const enUS = {
   ...common,
+  ...configGuard,
   ...remoteAccess,
   ...configManager,
   ...chat,

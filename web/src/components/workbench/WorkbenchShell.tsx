@@ -25,6 +25,8 @@ import { BookSwitcher } from './BookSwitcher'
 import { WorkbenchNoticePill } from './WorkbenchNoticePill'
 import type { WorkbenchNotice } from '@/features/notices/use-workbench-notice'
 import { MobileWorkbenchShell, type MobileWorkbenchDestination } from '@/features/mobile-workbench/MobileWorkbenchShell'
+import { UnsavedConfigGuardDialog } from '@/features/config-guard/UnsavedConfigGuardDialog'
+import { discardExecutableDraft, hasPendingExecutableDraft } from '@/features/config-guard/executable-draft-guard'
 import { MobileMoreMenu, type MobileMoreMenuItem } from '@/features/mobile-workbench/MobileMoreMenu'
 import { requestAgentSessionRecovery, requestInteractiveStoryRecovery } from '@/features/mobile-workbench/task-recovery-navigation'
 
@@ -145,6 +147,7 @@ export function WorkbenchShell({
     result: EMPTY_TASK_CENTER,
     loadState: 'loading',
   })
+  const [pendingLeave, setPendingLeave] = useState<{ key: string; proceed: () => void } | null>(null)
   const notifiedTaskIDsRef = useRef(new Set<string>())
   const [mainContentHost] = useState(() => {
     const host = createStablePortalHost('h-full min-h-0 w-full min-w-0 overflow-hidden')
@@ -244,16 +247,29 @@ export function WorkbenchShell({
     if (settingsOpen) onCloseSettings()
   }
 
+  const leaveConfigSurface = (action: () => void) => {
+    const key = mode === 'skills' ? 'skills' : mode === 'agents' ? 'agents' : mode === 'automations' ? 'automations' : null
+    if (key && !settingsOpen && hasPendingExecutableDraft(key)) {
+      setPendingLeave({ key, proceed: action })
+      return
+    }
+    action()
+  }
+
   const openWriting = () => {
-    closeSettingsIfOpen()
-    onSetMode('ide')
-    if (loreVisible || tellerVisible || versionsVisible) onSetRightPanel(null)
+    leaveConfigSurface(() => {
+      closeSettingsIfOpen()
+      onSetMode('ide')
+      if (loreVisible || tellerVisible || versionsVisible) onSetRightPanel(null)
+    })
   }
 
   const switchNavigationMode = (nextMode: 'ide' | 'interactive') => {
-    closeSettingsIfOpen()
-    if (versionsVisible) onSetRightPanel(null)
-    onSetMode(nextMode)
+    leaveConfigSurface(() => {
+      closeSettingsIfOpen()
+      if (versionsVisible) onSetRightPanel(null)
+      onSetMode(nextMode)
+    })
   }
 
   const toggleIdePanel = (panel: NonNullable<RightPanel>) => {
@@ -263,24 +279,30 @@ export function WorkbenchShell({
   }
 
   const openVersions = () => {
-    closeSettingsIfOpen()
-    if (mode === 'books' || mode === 'skills' || mode === 'agents' || mode === 'automations') {
-      onSetMode(booksReturnMode)
-    }
-    onSetRightPanel(versionsVisible ? null : 'versions')
+    leaveConfigSurface(() => {
+      closeSettingsIfOpen()
+      if (mode === 'books' || mode === 'skills' || mode === 'agents' || mode === 'automations') {
+        onSetMode(booksReturnMode)
+      }
+      onSetRightPanel(versionsVisible ? null : 'versions')
+    })
   }
 
   const openInteractiveSubmode = (nextMode: InteractiveSubmode) => {
-    closeSettingsIfOpen()
-    if (versionsVisible) onSetRightPanel(null)
-    onSetMode('interactive')
-    onSetInteractiveSubmode(nextMode)
+    leaveConfigSurface(() => {
+      closeSettingsIfOpen()
+      if (versionsVisible) onSetRightPanel(null)
+      onSetMode('interactive')
+      onSetInteractiveSubmode(nextMode)
+    })
   }
 
   const openMobileAgent = () => {
-    closeSettingsIfOpen()
-    onSetMode('ide')
-    onSetRightPanel('ai')
+    leaveConfigSurface(() => {
+      closeSettingsIfOpen()
+      onSetMode('ide')
+      onSetRightPanel('ai')
+    })
   }
 
   const returnFromBooks = () => {
@@ -297,52 +319,64 @@ export function WorkbenchShell({
       returnFromBooks()
       return
     }
-    closeSettingsIfOpen()
-    if (versionsVisible) onSetRightPanel(null)
-    onSetMode('books')
+    leaveConfigSurface(() => {
+      closeSettingsIfOpen()
+      if (versionsVisible) onSetRightPanel(null)
+      onSetMode('books')
+    })
   }
 
   const manageBooks = () => {
-    closeSettingsIfOpen()
-    if (versionsVisible) onSetRightPanel(null)
-    onSetMode('books')
+    leaveConfigSurface(() => {
+      closeSettingsIfOpen()
+      if (versionsVisible) onSetRightPanel(null)
+      onSetMode('books')
+    })
   }
 
   const openAgents = () => {
     if (mode === 'agents' && !settingsOpen) {
-      returnFromBooks()
+      leaveConfigSurface(returnFromBooks)
       return
     }
-    closeSettingsIfOpen()
-    if (versionsVisible) onSetRightPanel(null)
-    onSetMode('agents')
+    leaveConfigSurface(() => {
+      closeSettingsIfOpen()
+      if (versionsVisible) onSetRightPanel(null)
+      onSetMode('agents')
+    })
   }
 
   const openSkills = () => {
     if (mode === 'skills' && !settingsOpen) {
-      returnFromBooks()
+      leaveConfigSurface(returnFromBooks)
       return
     }
-    closeSettingsIfOpen()
-    if (versionsVisible) onSetRightPanel(null)
-    onSetMode('skills')
+    leaveConfigSurface(() => {
+      closeSettingsIfOpen()
+      if (versionsVisible) onSetRightPanel(null)
+      onSetMode('skills')
+    })
   }
 
   const openAutomations = () => {
     if (mode === 'automations' && !settingsOpen) {
-      returnFromBooks()
+      leaveConfigSurface(returnFromBooks)
       return
     }
-    closeSettingsIfOpen()
-    if (versionsVisible) onSetRightPanel(null)
-    onSetMode('automations')
+    leaveConfigSurface(() => {
+      closeSettingsIfOpen()
+      if (versionsVisible) onSetRightPanel(null)
+      onSetMode('automations')
+    })
   }
 
   const openAutomationNotification = (target: AutomationMessageNavigation) => {
-    closeSettingsIfOpen()
-    if (versionsVisible) onSetRightPanel(null)
-    requestAutomationNavigation(target)
-    onSetMode('automations')
+    leaveConfigSurface(() => {
+      closeSettingsIfOpen()
+      if (versionsVisible) onSetRightPanel(null)
+      requestAutomationNavigation(target)
+      onSetMode('automations')
+    })
   }
 
   const openMobileTask = (task: TaskCenterTask) => {
@@ -793,6 +827,19 @@ export function WorkbenchShell({
           )}
         />
         {mainContentPortal}
+        <UnsavedConfigGuardDialog
+          open={Boolean(pendingLeave)}
+          onOpenChange={(open) => {
+            if (!open) setPendingLeave(null)
+          }}
+          onDiscard={() => {
+            const target = pendingLeave
+            if (!target) return
+            setPendingLeave(null)
+            void discardExecutableDraft(target.key)
+            target.proceed()
+          }}
+        />
       </>
     )
   }
@@ -812,6 +859,19 @@ export function WorkbenchShell({
         statusBar={statusBar}
       />
       {mainContentPortal}
+      <UnsavedConfigGuardDialog
+        open={Boolean(pendingLeave)}
+        onOpenChange={(open) => {
+          if (!open) setPendingLeave(null)
+        }}
+        onDiscard={() => {
+          const target = pendingLeave
+          if (!target) return
+          setPendingLeave(null)
+          void discardExecutableDraft(target.key)
+          target.proceed()
+        }}
+      />
     </>
   )
 }

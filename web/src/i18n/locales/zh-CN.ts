@@ -1,4 +1,5 @@
 import common from './zh-CN/common'
+import configGuard from './zh-CN/configGuard'
 import remoteAccess from './zh-CN/remoteAccess'
 import configManager from './zh-CN/configManager'
 import chat from './zh-CN/chat'
@@ -41,6 +42,7 @@ import changes from './zh-CN/changes'
 
 const zhCN = {
   ...common,
+  ...configGuard,
   ...remoteAccess,
   ...configManager,
   ...chat,

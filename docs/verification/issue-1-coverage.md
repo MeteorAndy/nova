@@ -107,7 +107,7 @@
 | 82 | List-to-full-detail management pages | ✅ | AdaptiveSurface drawer flows asserted (Agents narrow + Skills mobile tests); kept-mounted routes |
 | 83 | Restore search/filter/scroll/selection | ✅ | MobilePaneHost keeps drawer panes mounted; adaptive-surface + SkillsView tests assert search survives close/reopen |
 | 84 | Executable config staged + validated | ✅ | settings/config-manager tests |
-| 85 | Unsaved config return protection | 🟡 | design in docs/verification/executable-config-return-guard-design.md; awaiting confirmation before implementation |
+| 85 | Unsaved config return protection | 🟡 | shared executable-draft-guard registry + UnsavedConfigGuardDialog wired; Automations/Skills/Agents registered; SettingPanel remains |
 | 86 | Continuous draft autosave + conflict display | ✅ | useEditorDraftPersistence tests |
 | 87 | Immediate preferences autosave | ✅ | settings auto-save tests |
 | 88 | Short offline editing of open docs | ✅ | pending-drafts tests |

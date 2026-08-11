@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 可执行配置返回保护（故事 85 第一阶段）：新增共享草稿守卫注册表与“继续编辑/放弃修改”对话框，Automations、Skills、Agents 在返回或切换时会拦截未保存草稿；游戏模式 SettingPanel 待接入。
+- Executable config return guard (story 85, phase 1): a shared draft-guard registry and a keep-editing/discard dialog now intercept unsaved drafts when leaving Automations, Skills, or Agents; the game-mode SettingPanel wiring remains.
 - 移动工作台可访问名称冒烟测试：所有可见按钮与图片必须有可读名称；完整读屏器审计仍待进行。
 - Mobile workbench accessible-name smoke test added: every visible button and image must have a readable name; a full screen-reader audit is still pending.
 - Agent 会话滚动位置按会话保留：切换会话后消息列表恢复各自滚动位置；结合会话草稿与运行状态恢复，故事 33 全部覆盖。
