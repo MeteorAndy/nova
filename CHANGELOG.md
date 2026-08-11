@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 项目工作面恢复增强（故事 24 部分）：全局搜索词按创作项目记忆，切走再返回后搜索框恢复；视图与选中文件保持原有保留行为。
+- Project surface restoration extended (story 24, partial): the global search query is remembered per project and restored after leaving and returning; view and selected file keep their existing persistence.
+- 可访问性语义审计完成（故事 101）：自动化覆盖移动外壳、更多菜单与任务中心，所有可见按钮/图片有可读名称，导航与区域有命名；真机读屏通过列为设备级后续项。
+- Screen-reader semantics audit completed (story 101): automated coverage includes the mobile shell, More menu, and task center, with readable names for all visible buttons/images and named navigation/regions; a real-device SR pass remains a device-level follow-up.
 - 可执行配置返回保护（故事 85 第一阶段）：新增共享草稿守卫注册表与“继续编辑/放弃修改”对话框，Automations、Skills、Agents 在返回或切换时会拦截未保存草稿；游戏模式 SettingPanel 待接入。
 - Executable config return guard (story 85, phase 1): a shared draft-guard registry and a keep-editing/discard dialog now intercept unsaved drafts when leaving Automations, Skills, or Agents; the game-mode SettingPanel wiring remains.
 - 移动工作台可访问名称冒烟测试：所有可见按钮与图片必须有可读名称；完整读屏器审计仍待进行。

@@ -91,15 +91,34 @@ describe('Mobile Workbench', () => {
     expect(within(navigation).getByRole('button', { name: '更多' })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('移动工作台可见控件与图片都有可访问名称', () => {
-    render(<WorkbenchShell {...workbenchProps(<div>正文内容</div>)} />)
+  it('移动工作台可见控件与图片都有可访问名称', async () => {
+    const user = userEvent.setup()
+    render(
+      <WorkbenchShell
+        {...workbenchProps(<div>正文内容</div>)}
+        onQuickSwitchBook={vi.fn().mockResolvedValue(true)}
+      />,
+    )
 
-    for (const button of screen.getAllByRole('button')) {
-      expect(button).toHaveAccessibleName()
+    const assertVisibleNames = () => {
+      for (const button of screen.getAllByRole('button')) {
+        expect(button).toHaveAccessibleName()
+      }
+      for (const img of document.querySelectorAll('img')) {
+        expect(img).toHaveAccessibleName()
+      }
     }
-    for (const img of document.querySelectorAll('img')) {
-      expect(img).toHaveAccessibleName()
-    }
+
+    assertVisibleNames()
+
+    const navigation = screen.getByRole('navigation', { name: '移动端工作台导航' })
+    await user.click(within(navigation).getByRole('button', { name: '更多' }))
+    assertVisibleNames()
+
+    await user.click(screen.getByRole('button', { name: '任务中心' }))
+    const taskRegion = screen.getByRole('region', { name: '任务中心' })
+    expect(taskRegion).toHaveAccessibleName()
+    assertVisibleNames()
   })
 
   it('未保存自动化配置时返回会弹出继续编辑/放弃修改', async () => {

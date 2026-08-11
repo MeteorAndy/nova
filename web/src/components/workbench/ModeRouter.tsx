@@ -258,6 +258,7 @@ export function ModeRouter(props: ModeRouterProps) {
   const documentReviewNavigationRequestRef = useRef(0)
   const documentReviewNavigationNonceRef = useRef(0)
   const [editorLine, setEditorLine] = useState(1)
+  const sidebarSearchByWorkspaceRef = useRef(new Map<string, string>())
   // The router is the lifecycle owner: the settings lane survives AgentPanel close/unmount.
   const composerSettings = usePersistedUserSettings({ workspace, defaults: WRITING_COMPOSER_SETTING_DEFAULTS })
   const flushComposerSettings = composerSettings.flushPending
@@ -569,6 +570,8 @@ export function ModeRouter(props: ModeRouterProps) {
               requestMobileWorkbenchDestination('manuscript')
             }}
             onWorkspaceChanged={onWorkspaceChanged}
+            initialQuery={sidebarSearchByWorkspaceRef.current.get(workspace) ?? ''}
+            onQueryChange={(query) => sidebarSearchByWorkspaceRef.current.set(workspace, query)}
           />
         ) : tree.length === 0 ? (
           <div className="py-4 text-center text-[var(--nova-text-muted)]">{t('router.noFiles')}</div>

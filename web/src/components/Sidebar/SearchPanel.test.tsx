@@ -60,4 +60,20 @@ describe('SearchPanel（跨正文/规划/资料搜索）', () => {
 
     expect(handleSelect).toHaveBeenCalledWith(chapterResult, '灯塔')
   })
+
+  it('用 initialQuery 恢复搜索词并回传查询词', async () => {
+    const onQueryChange = vi.fn()
+
+    render(
+      <SearchPanel
+        workspace="/books/demo"
+        onSelectResult={vi.fn()}
+        initialQuery="灯塔"
+        onQueryChange={onQueryChange}
+      />,
+    )
+
+    expect(screen.getByPlaceholderText('搜索当前书籍...')).toHaveValue('灯塔')
+    await waitFor(() => expect(onQueryChange).toHaveBeenCalledWith('灯塔'))
+  })
 })

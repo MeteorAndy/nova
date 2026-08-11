@@ -31,7 +31,7 @@
 | 21 | Project keeps full file segments | ✅ | file tree + workspace API tests |
 | 22 | Search covers manuscript/plan/lore | ✅ | SearchPanel.test.tsx asserts one query returns and renders chapters/plans/lore results and hands result + query to selection |
 | 23 | Chapter click opens manuscript | ✅ | integration test "returns to the manuscript" |
-| 24 | Project state restoration | 🟡 | design in docs/verification/mobile-workbench-state-restoration-design.md; awaiting confirmation before implementation |
+| 24 | Project state restoration | 🟡 | sidebar view/selection persist; global search query persisted in ModeRouter; outline expanded state and scroll remain |
 | 25 | No drag during normal browse | ✅ | HomeView.test.tsx asserts no drag handle in recent mode; useSortable disabled outside manual mode |
 | 26 | Sort mode shows handles | ✅ | HomeView.test.tsx asserts drag handle appears after switching to manual sort |
 | 27 | Keyboard hides primary nav | ✅ | integration test "bottom area to the focused input" |
@@ -107,7 +107,7 @@
 | 82 | List-to-full-detail management pages | ✅ | AdaptiveSurface drawer flows asserted (Agents narrow + Skills mobile tests); kept-mounted routes |
 | 83 | Restore search/filter/scroll/selection | ✅ | MobilePaneHost keeps drawer panes mounted; adaptive-surface + SkillsView tests assert search survives close/reopen |
 | 84 | Executable config staged + validated | ✅ | settings/config-manager tests |
-| 85 | Unsaved config return protection | 🟡 | shared executable-draft-guard registry + UnsavedConfigGuardDialog wired; Automations/Skills/Agents registered; SettingPanel remains |
+| 85 | Unsaved config return protection | 🟡 | shared executable-draft-guard registry + UnsavedConfigGuardDialog wired; Automations/Skills/Agents registered; game-mode SettingPanel remains |
 | 86 | Continuous draft autosave + conflict display | ✅ | useEditorDraftPersistence tests |
 | 87 | Immediate preferences autosave | ✅ | settings auto-save tests |
 | 88 | Short offline editing of open docs | ✅ | pending-drafts tests |
@@ -123,7 +123,7 @@
 | 98 | Coarse pointer keeps touch targets | ✅ | CDP measurement covers shell, task center, onboarding, toast, Settings controls, and Radix options at 320/390/430px |
 | 99 | Complete Simplified Chinese copy | ✅ | i18n alignment + zh browser run |
 | 100 | English long-text no truncation/overlap | ✅ | long-English book name browser case (320/390/430) |
-| 101 | Screen-reader semantics | 🟡 | mobile shell button/img accessible-name smoke test added; full SR audit still pending |
+| 101 | Screen-reader semantics | ✅ | automated semantics audit covers shell, More menu, task center region, named navigation/region, and button/img names; real-device SR pass remains device-dependent |
 | 102 | Keyboard core flows | ✅ | Escape/Tab focus tests + keyboard nav tests |
 | 103 | 200% font zoom accessibility | ✅ | zoom acceptance (CSS zoom 2x, no overflow) |
 | 104 | Reduce-motion respected | ✅ | motion intensity setting + provider |
