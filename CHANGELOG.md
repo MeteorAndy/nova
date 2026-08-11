@@ -8,8 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- 覆盖矩阵剩余缺口整理完成：明确故事 24/33/85 待设计确认、故事 101 待读屏审计，以及设备级验证范围。
-- Coverage matrix remaining gaps consolidated: stories 24/33/85 await design confirmation, story 101 awaits a screen-reader audit, and device-level verification scope is documented.
+- Agent 会话滚动位置按会话保留：切换会话后消息列表恢复各自滚动位置；结合会话草稿与运行状态恢复，故事 33 全部覆盖。
+- Agent message scroll is now preserved per session: switching sessions restores each session's scroll position; with per-session drafts and run-state resume, story 33 is fully covered.
+- 覆盖矩阵剩余缺口整理完成：明确故事 24/85 待设计确认、故事 101 待读屏审计，以及设备级验证范围。
+- Coverage matrix remaining gaps consolidated: stories 24/85 await design confirmation, story 101 awaits a screen-reader audit, and device-level verification scope is documented.
 - 故事舞台提交增加离线门禁：离线时发送按钮禁用并提示，恢复连接后自动可用；故事 91 的提交/切换/迁移门禁全部覆盖。
 - The story stage submit control is now gated while offline: the send button is disabled with a clear message and recovers automatically; story 91 gates for submit, switch, and migration are fully covered.
 - 编辑器按文档光标位置恢复已实现并验证：切换文件后各自光标位置保留；结合草稿持久化、undo 隔离与滚动恢复，故事 18 全部覆盖。
