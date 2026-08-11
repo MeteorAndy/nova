@@ -117,7 +117,7 @@
 | 92 | Top/Android/browser share one back stack | ✅ | popstate + Escape tests |
 | 93 | Back priority: keyboard/surface/unsaved/full-screen | ✅ | Escape + dialog-first tests |
 | 94 | No left/right edge gestures | ✅ | no edge-swipe code in mobile shell |
-| 95 | Tablet two-pane when space allows | 🟡 | tier layout present; two-pane not browser-asserted |
+| 95 | Tablet two-pane when space allows | ✅ | AgentsView.test.tsx asserts list+detail visible on wide viewport and drawer flow on narrow screens; AdaptiveSurface tests cover collapse/expand |
 | 96 | Desktop keeps multi-pane + tabs | ✅ | desktop workbench retained; responsive tests |
 | 97 | Rotation keeps editor/session mounted | ✅ | adaptive-surface + stable host tests |
 | 98 | Coarse pointer keeps touch targets | ✅ | CDP measurement covers shell, task center, onboarding, toast, Settings controls, and Radix options at 320/390/430px |

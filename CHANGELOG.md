@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 平板/宽屏双栏验证：Agents 管理页在空间足够时同时显示 Agent 列表与详情，窄屏自动收进抽屉并可打开。
+- Tablet/wide two-pane verified: the Agents management page shows the agent list and detail side by side when space allows, and collapses the list into an openable drawer on narrow screens.
 - 剧情线分支支持重命名：移动端详情可打开重命名对话框，保存后分支列表与关系图立即显示新名称；新增 `PATCH /api/interactive/stories/:id/branches/:branch` 接口。
 - Storyline branches now support renaming: the mobile detail view opens a rename dialog, and the branch list plus relation graph show the new name immediately; added the `PATCH /api/interactive/stories/:id/branches/:branch` endpoint.
 - 移动端“剧情线”改为列表优先界面：当前分支置顶，展示名称、分歧回合、父分支、最新摘要、回合数与更新时间；点击进入纵向时间线详情，可继续游玩、切换或删除；关系总览作为次级入口保留，宽屏仍直接使用图形视图。
