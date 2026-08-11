@@ -105,6 +105,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- 配置管理 Agent 的后台运行现在会注册进统一任务中心并参与应用关闭时的任务停止：从 Agents/Skills/自动化等配置面启动任务后离开页面，任务中心仍能看到并恢复该项；点击任务会切回来源项目并打开对应管理面。
+- Config-manager background runs are now registered with the unified Task Center and stopped on app shutdown: starting a task from Agents/Skills/automations and leaving the page no longer hides it, and tapping the entry switches back to the source project and opens the owning management surface.
+- 小说导入后台任务改用任务上下文执行章节正则推断：页面或 SSE 连接断开后，推断不再随 HTTP 请求取消而失败并回退内置分章。
+- Background novel imports now run split-regex inference under the task context: losing the page or SSE connection no longer cancels inference and silently falls back to the built-in splitter.
+- 移动端任务中心打开任务后立即关闭任务中心与“更多”高亮，恢复的 Agent/故事工作流直接呈现；切换项目后全局搜索面板重置为该项目保存的搜索词，不再沿用上一项目的查询。
+- Mobile reviewer fixes: opening a task from the Task Center closes the Task Center and the More highlight so the recovered Agent/story workflow is shown; switching projects resets the global search panel to the new project's saved query instead of reusing the previous project's term.
 - 修复 InputArea 集成测试在负载下因异步重渲染导致的文本竞争：发送前先等待输入框内容稳定，避免偶发把旧快照与最新文本混在一起断言。
 - Fixed an InputArea integration test race where async re-renders could change the composer text between snapshot and send; the test now waits for the input to stabilize before submitting.
 - 任务中心现在为每次小说导入保留稳定且独立的任务记录：完成前后复用同一执行 ID 和恢复 ID，连续导入不再覆盖较早任务，失败导入保留来源项目，应用关闭时会停止仍在运行的导入。

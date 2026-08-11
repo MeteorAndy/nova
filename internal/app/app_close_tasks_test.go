@@ -12,13 +12,16 @@ func TestAppCloseStopsRegisteredBackgroundTasks(t *testing.T) {
 	agentStarted := make(chan struct{})
 	interactiveStarted := make(chan struct{})
 	novelImportStarted := make(chan struct{})
+	configManagerStarted := make(chan struct{})
 	agentTask := blockingLifecycleTask(agentStarted)
 	interactiveTask := blockingLifecycleTask(interactiveStarted)
 	novelImportTask := blockingLifecycleTask(novelImportStarted)
+	configManagerTask := blockingLifecycleTask(configManagerStarted)
 	t.Cleanup(func() {
 		agentTask.Abort()
 		interactiveTask.Abort()
 		novelImportTask.Abort()
+		configManagerTask.Abort()
 	})
 
 	application := &App{
@@ -32,10 +35,14 @@ func TestAppCloseStopsRegisteredBackgroundTasks(t *testing.T) {
 		novelImportTasks: map[string]*novelImportTaskState{
 			"novel": {task: novelImportTask},
 		},
+		configManagerTaskRuns: map[string]*configManagerTaskRun{
+			"config": {task: configManagerTask},
+		},
 	}
 	<-agentStarted
 	<-interactiveStarted
 	<-novelImportStarted
+	<-configManagerStarted
 
 	application.Close()
 
@@ -47,6 +54,9 @@ func TestAppCloseStopsRegisteredBackgroundTasks(t *testing.T) {
 	}
 	if novelImportTask.Status() != TaskAborted || !novelImportTask.Finished() {
 		t.Fatalf("novel import task remained active after App.Close: status=%s finished=%t", novelImportTask.Status(), novelImportTask.Finished())
+	}
+	if configManagerTask.Status() != TaskAborted || !configManagerTask.Finished() {
+		t.Fatalf("config-manager task remained active after App.Close: status=%s finished=%t", configManagerTask.Status(), configManagerTask.Finished())
 	}
 }
 

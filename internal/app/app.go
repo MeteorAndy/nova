@@ -36,6 +36,7 @@ type App struct {
 	interactiveTaskRuns    map[string]*interactiveTaskRun
 	activeLoreImageTask    *Task
 	novelImportTasks       map[string]*novelImportTaskState
+	configManagerTaskRuns  map[string]*configManagerTaskRun
 	activeAutomationTasks  map[string]*Task
 	activeAutomationRuns   map[string]automationRunState
 	activeAutomationClaims map[string]*automationRunClaim
@@ -241,7 +242,7 @@ func (a *App) Close() {
 
 func (a *App) stopBackgroundTasks() {
 	a.mu.RLock()
-	tasks := make(map[*Task]struct{}, len(a.agentTaskRuns)+len(a.interactiveTaskRuns)+len(a.novelImportTasks)+len(a.activeAutomationTasks)+1)
+	tasks := make(map[*Task]struct{}, len(a.agentTaskRuns)+len(a.interactiveTaskRuns)+len(a.novelImportTasks)+len(a.configManagerTaskRuns)+len(a.activeAutomationTasks)+1)
 	for _, run := range a.agentTaskRuns {
 		if run != nil && run.task != nil {
 			tasks[run.task] = struct{}{}
@@ -258,6 +259,11 @@ func (a *App) stopBackgroundTasks() {
 		}
 	}
 	for _, run := range a.novelImportTasks {
+		if run != nil && run.task != nil {
+			tasks[run.task] = struct{}{}
+		}
+	}
+	for _, run := range a.configManagerTaskRuns {
 		if run != nil && run.task != nil {
 			tasks[run.task] = struct{}{}
 		}

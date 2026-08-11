@@ -260,6 +260,16 @@ describe('Mobile Workbench', () => {
             updated_at: '2026-08-03T10:21:00Z',
             recovery: { kind: 'interactive_story', workspace: '/projects/story', task_id: 'task-story', story_id: 'story-harbor', branch_id: 'night' },
           },
+          {
+            id: 'agent:task-config',
+            type: 'agent',
+            status: 'running',
+            title: '调整写作模式方案预设',
+            project: { name: 'project-config', path: '/projects/config' },
+            started_at: '2026-08-03T10:30:00Z',
+            updated_at: '2026-08-03T10:31:00Z',
+            recovery: { kind: 'config_manager', workspace: '/projects/config', task_id: 'task-config', origin: 'agents', resource_id: 'agents:main' },
+          },
         ],
       })),
     )
@@ -302,14 +312,20 @@ describe('Mobile Workbench', () => {
       })
     })
     expect(onSetMode).toHaveBeenCalledWith('automations')
+    expect(screen.queryByRole('heading', { name: '任务中心' })).not.toBeInTheDocument()
 
+    await user.click(screen.getByRole('button', { name: '任务中心，2 项需要处理' }))
     await user.click(screen.getByRole('button', { name: '打开任务：Drafting session' }))
     await waitFor(() => {
       expect(onQuickSwitchBook).toHaveBeenCalledWith('/projects/agent')
       expect(agentTargets).toEqual([{ sessionId: 'session-agent', taskId: 'task-agent' }])
     })
     expect(onSetMode).toHaveBeenCalledWith('ide')
+    expect(screen.queryByRole('heading', { name: '任务中心' })).not.toBeInTheDocument()
+    expect(within(navigation).getByRole('button', { name: '更多' })).not.toHaveAttribute('aria-current', 'page')
 
+    await user.click(within(navigation).getByRole('button', { name: '更多' }))
+    await user.click(screen.getByRole('button', { name: '任务中心，2 项需要处理' }))
     await user.click(screen.getByRole('button', { name: '打开任务：Harbor story' }))
     await waitFor(() => {
       expect(onQuickSwitchBook).toHaveBeenCalledWith('/projects/story')
@@ -317,6 +333,17 @@ describe('Mobile Workbench', () => {
     })
     expect(onSetMode).toHaveBeenCalledWith('interactive')
     expect(onSetMode).not.toHaveBeenCalledWith('books')
+    expect(screen.queryByRole('heading', { name: '任务中心' })).not.toBeInTheDocument()
+    expect(within(navigation).getByRole('button', { name: '更多' })).not.toHaveAttribute('aria-current', 'page')
+
+    await user.click(within(navigation).getByRole('button', { name: '更多' }))
+    await user.click(screen.getByRole('button', { name: '任务中心，2 项需要处理' }))
+    await user.click(screen.getByRole('button', { name: '打开任务：调整写作模式方案预设' }))
+    await waitFor(() => {
+      expect(onQuickSwitchBook).toHaveBeenCalledWith('/projects/config')
+    })
+    expect(onSetMode).toHaveBeenCalledWith('agents')
+    expect(screen.queryByRole('heading', { name: '任务中心' })).not.toBeInTheDocument()
 
     window.removeEventListener('nova:open-agent-session', receiveAgent)
     window.removeEventListener('nova:open-interactive-story', receiveStory)

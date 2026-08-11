@@ -83,10 +83,13 @@ export function MobileWorkbenchShell({
 
   useEffect(() => {
     const navigate = (event: Event) => {
-      const destinationId = mobileWorkbenchDestinationFromEvent(event)
-      if (!destinationId || !destinations.some((item) => item.id === destinationId)) return
+      const target = mobileWorkbenchDestinationFromEvent(event)
+      if (!target) return
+      const targetMode = target.mode ?? modeKey
+      if (targetMode !== 'ide' && targetMode !== 'interactive') return
+      if (targetMode === modeKey && !destinations.some((item) => item.id === target.destinationId)) return
       setMoreOpen(false)
-      setActiveByMode((current) => ({ ...current, [modeKey]: destinationId }))
+      setActiveByMode((current) => ({ ...current, [targetMode]: target.destinationId }))
     }
     window.addEventListener(MOBILE_WORKBENCH_NAVIGATE_EVENT, navigate)
     return () => window.removeEventListener(MOBILE_WORKBENCH_NAVIGATE_EVENT, navigate)

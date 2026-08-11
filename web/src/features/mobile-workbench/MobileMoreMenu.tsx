@@ -73,13 +73,18 @@ export function MobileMoreMenu({
     if (history.state?.[MOBILE_TASK_CENTER_HISTORY_KEY] === 'task-center') history.back()
   }
 
+  const handleOpenTask = (task: TaskCenterTask) => {
+    returnFromTaskCenter()
+    onOpenTask(task)
+  }
+
   if (taskCenterOpen) {
     return (
       <MobileTaskCenter
         result={taskCenter}
         loadState={taskCenterLoadState}
         onBack={returnFromTaskCenter}
-        onOpenTask={onOpenTask}
+        onOpenTask={handleOpenTask}
       />
     )
   }

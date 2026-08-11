@@ -8,7 +8,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -20,8 +19,6 @@ import (
 
 // MaxNovelImportUploadBytes limits txt/md novel imports.
 const MaxNovelImportUploadBytes int64 = 64 * 1024 * 1024
-
-const novelImportToolAgentTimeout = 90 * time.Second
 
 type novelImportProgressEvent struct {
 	Step string `json:"step"`
@@ -84,7 +81,7 @@ func (h *Handlers) HandlePreviewNovelImportStream(ctx context.Context, c *app.Re
 				if err := writeNovelImportPreviewProgress(pw, "agent_start"); err != nil {
 					return "", err
 				}
-				inferCtx, cancel := context.WithTimeout(ctx, novelImportToolAgentTimeout)
+				inferCtx, cancel := context.WithTimeout(ctx, novaApp.NovelImportToolAgentTimeout)
 				defer cancel()
 				regex, err := h.app.InferNovelSplitRegex(inferCtx, sample)
 				if err != nil {
@@ -153,7 +150,7 @@ func (h *Handlers) novelImportOptions(ctx context.Context, c *app.RequestContext
 	}
 	if opts.SplitRegex == "" && opts.SplitStrategy != book.NovelImportSplitStrategyBuiltin {
 		opts.InferSplitRegex = func(sample string) (string, error) {
-			inferCtx, cancel := context.WithTimeout(ctx, novelImportToolAgentTimeout)
+			inferCtx, cancel := context.WithTimeout(ctx, novaApp.NovelImportToolAgentTimeout)
 			defer cancel()
 			return h.app.InferNovelSplitRegex(inferCtx, sample)
 		}

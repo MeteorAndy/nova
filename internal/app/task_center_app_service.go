@@ -96,6 +96,16 @@ func (a *App) Tasks() (taskcenter.ListResult, error) {
 			result.ActionRequiredCount++
 		}
 	}
+	for _, run := range a.configManagerTaskRunsSnapshot() {
+		task, taskErr := configManagerTaskCenterTask(run, projectNames)
+		if taskErr != nil {
+			return taskcenter.ListResult{}, taskErr
+		}
+		result.Tasks = append(result.Tasks, task)
+		if taskcenter.IsActionRequired(task.Status) {
+			result.ActionRequiredCount++
+		}
+	}
 	sort.SliceStable(result.Tasks, func(i, j int) bool {
 		if result.Tasks[i].UpdatedAt.Equal(result.Tasks[j].UpdatedAt) {
 			return result.Tasks[i].ID < result.Tasks[j].ID
@@ -103,6 +113,35 @@ func (a *App) Tasks() (taskcenter.ListResult, error) {
 		return result.Tasks[i].UpdatedAt.After(result.Tasks[j].UpdatedAt)
 	})
 	return result, nil
+}
+
+func configManagerTaskCenterTask(run configManagerTaskRun, projectNames map[string]string) (taskcenter.Task, error) {
+	snapshot := run.task.Snapshot()
+	status, err := agentTaskStatus(snapshot.Status)
+	if err != nil {
+		return taskcenter.Task{}, fmt.Errorf("config-manager task %s: %w", snapshot.ID, err)
+	}
+	workspace := run.workspace
+	return taskcenter.Task{
+		ID:        "agent:" + snapshot.ID,
+		Type:      taskcenter.TaskTypeAgent,
+		Status:    status,
+		Title:     configManagerTaskTitle(run.req),
+		Project:   taskProjectRef(workspace, projectNames),
+		StartedAt: snapshot.StartedAt,
+		UpdatedAt: snapshot.UpdatedAt,
+		Recovery: taskcenter.RecoveryTarget{
+			Kind:       taskcenter.RecoveryConfigManager,
+			Workspace:  workspace,
+			TaskID:     snapshot.ID,
+			SessionID:  run.sessionID,
+			Origin:     run.req.Origin,
+			ResourceID: run.req.ResourceID,
+			StoryID:    run.req.StoryID,
+			BranchID:   run.req.BranchID,
+		},
+		Error: snapshot.Error,
+	}, nil
 }
 
 func novelImportTaskCenterTask(run novelImportTaskSnapshot, projectNames map[string]string) (taskcenter.Task, error) {

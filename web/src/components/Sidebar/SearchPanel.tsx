@@ -50,6 +50,10 @@ export function SearchPanel({ workspace, onSelectResult, onWorkspaceChanged, ini
   }, [onQueryChange, query])
 
   useEffect(() => {
+    setQuery(initialQuery)
+  }, [initialQuery, workspace])
+
+  useEffect(() => {
     requestSeq.current += 1
     const seq = requestSeq.current
     setError('')

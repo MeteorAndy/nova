@@ -2,7 +2,7 @@ import { requestJSON } from './client'
 
 export type TaskCenterTaskType = 'agent' | 'automation' | 'interactive_story' | 'image_generation' | 'import_export'
 export type TaskCenterStatus = 'running' | 'waiting_user' | 'failed' | 'completed' | 'stopped'
-export type TaskCenterRecoveryKind = 'automation_run' | 'automation_inbox' | 'agent_session' | 'interactive_story' | 'image_generation' | 'import_export'
+export type TaskCenterRecoveryKind = 'automation_run' | 'automation_inbox' | 'agent_session' | 'config_manager' | 'interactive_story' | 'image_generation' | 'import_export'
 
 export interface TaskCenterTask {
   id: string
@@ -20,6 +20,8 @@ export interface TaskCenterTask {
     workspace: string
     task_id?: string
     session_id?: string
+    origin?: string
+    resource_id?: string
     story_id?: string
     branch_id?: string
     run_id?: string

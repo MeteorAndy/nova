@@ -5,10 +5,16 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"denova/internal/agent"
 	"denova/internal/book"
 )
+
+// NovelImportToolAgentTimeout bounds the model-only split-regex inference
+// inside a background import. The task context owns the timeout so inference
+// survives the originating HTTP request being canceled.
+const NovelImportToolAgentTimeout = 90 * time.Second
 
 // NovelImportTaskRequest carries everything the background import task needs.
 // The handler owns upload parsing and split-regex inference options.
@@ -60,8 +66,16 @@ func (a *App) StartNovelImportTask(ctx context.Context, req NovelImportTaskReque
 		case <-ctx.Done():
 			return
 		}
+		options := req.Options
+		if options.SplitRegex == "" && options.SplitStrategy != book.NovelImportSplitStrategyBuiltin {
+			options.InferSplitRegex = func(sample string) (string, error) {
+				inferCtx, cancel := context.WithTimeout(ctx, NovelImportToolAgentTimeout)
+				defer cancel()
+				return a.InferNovelSplitRegex(inferCtx, sample)
+			}
+		}
 		emit(agent.Event{Type: "progress", Data: novelImportTaskProgress{Step: "uploaded"}})
-		preview, err := book.PreviewNovelImport(req.Filename, req.Data, req.Options)
+		preview, err := book.PreviewNovelImport(req.Filename, req.Data, options)
 		if err != nil {
 			a.recordNovelImportResult(task, "", req.Filename, err)
 			emit(agent.Event{Type: "error", Data: novelImportTaskError{Error: err.Error()}})
@@ -78,7 +92,7 @@ func (a *App) StartNovelImportTask(ctx context.Context, req NovelImportTaskReque
 			return
 		}
 		emit(agent.Event{Type: "progress", Data: novelImportTaskProgress{Step: "importing"}})
-		importPreview, paths, err := book.ImportNovelToWorkspace(workspace, req.Filename, req.Data, req.Options)
+		importPreview, paths, err := book.ImportNovelToWorkspace(workspace, req.Filename, req.Data, options)
 		if err != nil {
 			a.recordNovelImportResult(task, workspace, title, err)
 			emit(agent.Event{Type: "error", Data: novelImportTaskError{Error: err.Error()}})

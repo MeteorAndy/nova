@@ -32,6 +32,7 @@ const (
 	RecoveryAutomationRun    RecoveryKind = "automation_run"
 	RecoveryAutomationInbox  RecoveryKind = "automation_inbox"
 	RecoveryAgentSession     RecoveryKind = "agent_session"
+	RecoveryConfigManager    RecoveryKind = "config_manager"
 	RecoveryInteractiveStory RecoveryKind = "interactive_story"
 	RecoveryImageGeneration  RecoveryKind = "image_generation"
 	RecoveryImportExport     RecoveryKind = "import_export"
@@ -43,14 +44,16 @@ type ProjectRef struct {
 }
 
 type RecoveryTarget struct {
-	Kind      RecoveryKind `json:"kind"`
-	Workspace string       `json:"workspace"`
-	TaskID    string       `json:"task_id,omitempty"`
-	SessionID string       `json:"session_id,omitempty"`
-	StoryID   string       `json:"story_id,omitempty"`
-	BranchID  string       `json:"branch_id,omitempty"`
-	RunID     string       `json:"run_id,omitempty"`
-	InboxID   string       `json:"inbox_id,omitempty"`
+	Kind       RecoveryKind `json:"kind"`
+	Workspace  string       `json:"workspace"`
+	TaskID     string       `json:"task_id,omitempty"`
+	SessionID  string       `json:"session_id,omitempty"`
+	Origin     string       `json:"origin,omitempty"`
+	ResourceID string       `json:"resource_id,omitempty"`
+	StoryID    string       `json:"story_id,omitempty"`
+	BranchID   string       `json:"branch_id,omitempty"`
+	RunID      string       `json:"run_id,omitempty"`
+	InboxID    string       `json:"inbox_id,omitempty"`
 }
 
 type Task struct {

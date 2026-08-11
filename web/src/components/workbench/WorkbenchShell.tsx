@@ -29,6 +29,7 @@ import { UnsavedConfigGuardDialog } from '@/features/config-guard/UnsavedConfigG
 import { discardExecutableDraft, hasPendingExecutableDraft } from '@/features/config-guard/executable-draft-guard'
 import { MobileMoreMenu, type MobileMoreMenuItem } from '@/features/mobile-workbench/MobileMoreMenu'
 import { requestAgentSessionRecovery, requestInteractiveStoryRecovery } from '@/features/mobile-workbench/task-recovery-navigation'
+import { requestMobileWorkbenchDestination } from '@/features/mobile-workbench/navigation'
 
 interface WorkbenchShellProps {
   mode: WorkspaceMode
@@ -415,20 +416,31 @@ export function WorkbenchShell({
         })
         return
       case 'agent_session':
-		if (!task.recovery.session_id) return
+        if (!task.recovery.session_id) return
         void onQuickSwitchBook(task.recovery.workspace).then((switched) => {
-			if (!switched) return
-			requestAgentSessionRecovery({ sessionId: task.recovery.session_id!, taskId: task.recovery.task_id })
-			openMobileAgent()
+          if (!switched) return
+          requestAgentSessionRecovery({ sessionId: task.recovery.session_id!, taskId: task.recovery.task_id })
+          openMobileAgent()
+          requestMobileWorkbenchDestination('agent', 'ide')
+        })
+        return
+      case 'config_manager':
+        if (!task.recovery.task_id) return
+        void onQuickSwitchBook(task.recovery.workspace).then((switched) => {
+          if (!switched) return
+          if (task.recovery.origin === 'skills') onSetMode('skills')
+          else if (task.recovery.origin === 'automation') onSetMode('automations')
+          else onSetMode('agents')
         })
         return
       case 'interactive_story':
-		if (!task.recovery.story_id || !task.recovery.branch_id) return
+        if (!task.recovery.story_id || !task.recovery.branch_id) return
         void onQuickSwitchBook(task.recovery.workspace).then((switched) => {
           if (!switched) return
-			requestInteractiveStoryRecovery({ storyId: task.recovery.story_id!, branchId: task.recovery.branch_id!, taskId: task.recovery.task_id })
+          requestInteractiveStoryRecovery({ storyId: task.recovery.story_id!, branchId: task.recovery.branch_id!, taskId: task.recovery.task_id })
           onSetMode('interactive')
           onSetInteractiveSubmode('story')
+          requestMobileWorkbenchDestination('story', 'interactive')
         })
         return
       case 'image_generation':

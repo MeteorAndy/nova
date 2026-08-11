@@ -13,6 +13,7 @@ describe('SearchPanel（跨正文/规划/资料搜索）', () => {
   beforeEach(() => {
     vi.mocked(replaceWorkspace).mockReset()
     vi.mocked(searchWorkspace).mockReset()
+    vi.mocked(searchWorkspace).mockResolvedValue([])
   })
 
   it('一次搜索返回并展示正文、规划与资料结果', async () => {
@@ -75,5 +76,59 @@ describe('SearchPanel（跨正文/规划/资料搜索）', () => {
 
     expect(screen.getByPlaceholderText('搜索当前书籍...')).toHaveValue('灯塔')
     await waitFor(() => expect(onQueryChange).toHaveBeenCalledWith('灯塔'))
+  })
+
+  it('切换项目时恢复新项目保存的搜索词', async () => {
+    const onQueryChange = vi.fn()
+    const view = render(
+      <SearchPanel
+        workspace="/books/demo"
+        onSelectResult={vi.fn()}
+        initialQuery="灯塔"
+        onQueryChange={onQueryChange}
+      />,
+    )
+
+    await userEvent.setup().type(screen.getByPlaceholderText('搜索当前书籍...'), '续写')
+    view.rerender(
+      <SearchPanel
+        workspace="/books/other"
+        onSelectResult={vi.fn()}
+        initialQuery="星空"
+        onQueryChange={onQueryChange}
+      />,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('搜索当前书籍...')).toHaveValue('星空')
+    })
+    expect(onQueryChange).toHaveBeenCalledWith('星空')
+  })
+
+  it('切换项目后清空上一项目的搜索词', async () => {
+    const onQueryChange = vi.fn()
+    const view = render(
+      <SearchPanel
+        workspace="/books/demo"
+        onSelectResult={vi.fn()}
+        initialQuery="灯塔"
+        onQueryChange={onQueryChange}
+      />,
+    )
+
+    await userEvent.setup().type(screen.getByPlaceholderText('搜索当前书籍...'), '续写')
+    view.rerender(
+      <SearchPanel
+        workspace="/books/other"
+        onSelectResult={vi.fn()}
+        initialQuery=""
+        onQueryChange={onQueryChange}
+      />,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('搜索当前书籍...')).toHaveValue('')
+    })
+    expect(onQueryChange).toHaveBeenCalledWith('')
   })
 })
