@@ -31,7 +31,7 @@
 | 21 | Project keeps full file segments | ✅ | file tree + workspace API tests |
 | 22 | Search covers manuscript/plan/lore | ✅ | SearchPanel.test.tsx asserts one query returns and renders chapters/plans/lore results and hands result + query to selection |
 | 23 | Chapter click opens manuscript | ✅ | integration test "returns to the manuscript" |
-| 24 | Project state restoration | 🟡 | kept-mounted routes; scroll/selection not asserted |
+| 24 | Project state restoration | 🟡 | design in docs/architecture/mobile-workbench-state-restoration-design.md; awaiting confirmation before implementation |
 | 25 | No drag during normal browse | ✅ | HomeView.test.tsx asserts no drag handle in recent mode; useSortable disabled outside manual mode |
 | 26 | Sort mode shows handles | ✅ | HomeView.test.tsx asserts drag handle appears after switching to manual sort |
 | 27 | Keyboard hides primary nav | ✅ | integration test "bottom area to the focused input" |
@@ -107,7 +107,7 @@
 | 82 | List-to-full-detail management pages | ✅ | AdaptiveSurface drawer flows asserted (Agents narrow + Skills mobile tests); kept-mounted routes |
 | 83 | Restore search/filter/scroll/selection | ✅ | MobilePaneHost keeps drawer panes mounted; adaptive-surface + SkillsView tests assert search survives close/reopen |
 | 84 | Executable config staged + validated | ✅ | settings/config-manager tests |
-| 85 | Unsaved config return protection | 🟡 | settings draft tests exist; return guard not asserted |
+| 85 | Unsaved config return protection | 🟡 | design in docs/architecture/executable-config-return-guard-design.md; awaiting confirmation before implementation |
 | 86 | Continuous draft autosave + conflict display | ✅ | useEditorDraftPersistence tests |
 | 87 | Immediate preferences autosave | ✅ | settings auto-save tests |
 | 88 | Short offline editing of open docs | ✅ | pending-drafts tests |
