@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- 编辑器按文档光标位置恢复已实现并验证：切换文件后各自光标位置保留；结合草稿持久化、undo 隔离与滚动恢复，故事 18 全部覆盖。
+- Editor per-document cursor restoration implemented and verified: each file keeps its own cursor position across switches; with draft persistence, undo isolation, and scroll restoration, story 18 is fully covered.
 - 断线门禁扩展：离线时 Agent 输入发送按钮禁用并提示，结构迁移（新建/重命名/移动/删除）被阻止并显示明确错误；恢复连接后自动恢复可用。
 - Offline gates extended: the Agent composer send control is disabled with a clear message, and structure migration (create/rename/move/delete) is blocked with an explicit error while offline; both recover when back online.
 - 编辑器按文档滚动位置恢复已验证：切换文件后各自滚动位置保留；光标恢复仍待实现。

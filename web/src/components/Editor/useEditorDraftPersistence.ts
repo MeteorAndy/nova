@@ -162,7 +162,7 @@ export function useEditorDraftPersistence({
   // so coalescing one document never discards a different document.
   const queuedRequestsRef = useRef(new Map<string, PendingSave>())
   const pendingRestoreKeyRef = useRef<string | null>(null)
-  const filePositionsRef = useRef(new Map<string, { scrollTop: number }>())
+  const filePositionsRef = useRef(new Map<string, { scrollTop: number; selectionFrom?: number; selectionTo?: number }>())
   const lastSaveSignalRef = useRef(saveSignal)
   const tRef = useRef(t)
 
@@ -639,7 +639,12 @@ export function useEditorDraftPersistence({
 
     const scrollEl = editorContainerRef.current
     if (fileChanged && previousFile) {
-      filePositionsRef.current.set(documentSaveKey(previousWorkspace, previousFile), { scrollTop: scrollEl?.scrollTop ?? 0 })
+      const selection = editor?.state?.selection
+      filePositionsRef.current.set(documentSaveKey(previousWorkspace, previousFile), {
+        scrollTop: scrollEl?.scrollTop ?? 0,
+        selectionFrom: selection ? selection.from : undefined,
+        selectionTo: selection ? selection.to : undefined,
+      })
     }
     if (fileChanged && scrollEl) scrollEl.style.visibility = 'hidden'
 
@@ -663,6 +668,9 @@ export function useEditorDraftPersistence({
       requestAnimationFrame(() => {
         scrollEl.scrollTop = saved?.scrollTop ?? 0
         scrollEl.style.visibility = ''
+        if (editor && !editor.isDestroyed && saved?.selectionFrom != null && saved.selectionTo != null) {
+          editor.commands.setTextSelection({ from: saved.selectionFrom, to: saved.selectionTo })
+        }
       })
     }
   }, [applyExternalContent, archiveConflict, cancelDocumentSave, content, editor, editorContainerRef, fileName, flush, onExternalConflict, pendingSave, queueSave, resetQueuedSaves, revision, updateExternalConflict, workspace])

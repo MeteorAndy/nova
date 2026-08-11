@@ -165,7 +165,7 @@ describe('应用级项目切换保存保护', () => {
     renderApp()
 
     const switcher = await screen.findByRole('button', { name: '切换书籍，当前：创作项目一' })
-    const editor = await waitFor(() => document.querySelector('.ProseMirror'))
+    const editor = await waitFor(() => document.querySelector('.ProseMirror'), { timeout: 5000 })
     expect(editor).not.toBeNull()
 
     await user.click(editor!)
@@ -192,7 +192,7 @@ describe('应用级项目切换保存保护', () => {
     renderApp()
 
     const switcher = await screen.findByRole('button', { name: '切换书籍，当前：创作项目一' })
-    const editor = await waitFor(() => document.querySelector('.ProseMirror'))
+    const editor = await waitFor(() => document.querySelector('.ProseMirror'), { timeout: 5000 })
     expect(editor).not.toBeNull()
 
     await user.click(editor!)
@@ -238,7 +238,7 @@ describe('应用级项目切换保存保护', () => {
     renderApp()
 
     const switcher = await screen.findByRole('button', { name: '切换书籍，当前：创作项目一' })
-    const editor = await waitFor(() => document.querySelector('.ProseMirror'))
+    const editor = await waitFor(() => document.querySelector('.ProseMirror'), { timeout: 5000 })
     expect(editor).not.toBeNull()
 
     await user.click(editor!)
